@@ -21,9 +21,10 @@ interface INewUserData {
   career: string;
   semester: Number;
   careerDD?: string;
-  semestreDD?: Number;
+  semesterDD?: Number;
   status: EStatus;
   type: EType;
+  schedules?: Array<INewUserSchedule>;
 }
 interface INewUserSchedule {
   start: Date;
@@ -33,8 +34,18 @@ interface INewUserSchedule {
 export const createUser = async (req: Request, res: Response) => {
   console.log("CREANDO NUEVO USUARIO...");
   //Create user
-  const { name, email, password, semester, status, type }: INewUserData =
-    req.body;
+  const {
+    name,
+    email,
+    password,
+    career,
+    semester,
+    careerDD,
+    semesterDD,
+    status,
+    type,
+    schedules,
+  }: INewUserData = req.body;
   try {
     let newUserId = uuid();
     await db("users").insert({
@@ -42,45 +53,41 @@ export const createUser = async (req: Request, res: Response) => {
       name: name,
       email: email,
       password: password,
-      semester: semester,
       status: status,
       type: type,
       created_at: new Date(),
       updated_at: new Date(),
     });
     res.sendStatus(200);
-    //TODO: Insert user data in careers table if type is advisor or student
+    //Insert user data in careers table if type is advisor or student
     if (EType.student === type || EType.advisor === type) {
       console.log("INSERTANDO CARRERA DEL USUARIO...");
       await db("users-career").insert({
         id: uuid(),
         id_user: newUserId,
-        id_career: "TODO", //careerId
+        id_career: career,
+        semester: semester,
       });
-      //TODO (again lol): Insert double degree career if is not undefined.
-      /*
-        if (careerDD != undefinded){
-          await db("users-career").insert({
-            id: uuid(),
-            id_user: newUserId,
-            id_career: "TODO", //careerIdDD
-          });
-        }
-      */
+      if (careerDD != undefined) {
+        await db("users-career").insert({
+          id: uuid(),
+          id_user: newUserId,
+          id_career: careerDD,
+          semester: semesterDD,
+        });
+      }
     }
     //Create user schedules if type is advisor
-    if (EType.advisor === type) {
-      console.log("CREANDO HORARIOS DEL USUARIO...");
-      for (let i = 0; i < 3; i++) {
-        const { start, finish, period }: INewUserSchedule = req.body;
+    if (EType.advisor === type && schedules != undefined) {
+      for (let i = 0; i < schedules.length; i++) {
         let newScheduleId = uuid();
         await db("schedules").insert({
           id: newScheduleId,
-          start: start,
-          finish: finish,
-          period: period,
+          start: schedules[i].start,
+          finish: schedules[i].finish,
+          period: schedules[i].period,
         });
-        await db("user-schedules").insert({
+        await db("users-schedule").insert({
           id: uuid(),
           id_user: newUserId,
           id_schedule: newScheduleId,
