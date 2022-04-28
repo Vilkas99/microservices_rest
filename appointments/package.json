@@ -6,8 +6,8 @@
   "scripts": {
     "start": "nodemon source/server.ts",
     "build": "rm -rf build/ && prettier --write source/ && tsc",
-    "migrate": "knex migrate:latest --knexfile source/db/knexfile.ts",
-    "migrate_d": "knex migrate:down --knexfile source/db/knexfile.ts",
+    "migrate": "knex migrate:latest --knexfile knexfile.ts",
+    "migrate_d": "knex migrate:down --knexfile knexfile.ts",
     "create_m": "knex migrate:make --knexfile source/db/knexfile.ts -x ts walletDB",
     "create_s": "knex seed:make --knexfile source/db/knexfile.ts -x ts dev",
     "seed": "knex seed:run --knexfile source/db/knexfile.ts",
