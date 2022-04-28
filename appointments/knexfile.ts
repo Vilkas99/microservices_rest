@@ -12,10 +12,10 @@ const configs = {
   },
   migrations: {
     tableName: "PAE",
-    directory: __dirname + "/migrations",
+    directory: __dirname + "/source/db/migrations",
   },
   seeds: {
-    directory: __dirname + "/seeds",
+    directory: __dirname + "/source/db/seeds",
   },
 };
 
