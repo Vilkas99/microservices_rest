@@ -5,6 +5,8 @@ import express, { Express } from "express";
 //Enviroment dotenv
 require("dotenv").config();
 
+var cors = require("cors");
+
 //Routes
 const example_routes = require("./routes/Example");
 const appointment_routes = require("./routes/Appointments");
@@ -17,23 +19,7 @@ router.use(express.urlencoded({ extended: false }));
 /** Takes care of JSON data */
 router.use(express.json());
 
-/** RULES OF OUR API */
-router.use((req, res, next) => {
-  // set the CORS policy
-  res.header("Access-Control-Allow-Origin", "*");
-  // set the CORS headers
-  res.header(
-    "Access-Control-Allow-Headers",
-    "origin, X-Requested-With,Content-Type,Accept, Authorization"
-  );
-  // set the CORS method headers
-  if (req.method === "OPTIONS") {
-    res.header("Access-Control-Allow-Methods", "GET PATCH DELETE POST");
-    return res.status(200).json({});
-  }
-  next();
-});
-
+router.use(cors());
 //Apply routes
 router.use("/admin", example_routes);
 router.use("/appointment", appointment_routes);
