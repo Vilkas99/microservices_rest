@@ -9,6 +9,7 @@ const configs = {
     password: process.env.POSTGRESS_PASSWORD as string,
     database: process.env.POSTGRESS_DB as string,
     ssl: { rejectUnauthorized: false },
+    timezone: "UTC-6",
   },
   migrations: {
     tableName: "PAE",

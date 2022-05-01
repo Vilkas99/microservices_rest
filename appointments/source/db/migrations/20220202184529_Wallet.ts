@@ -7,7 +7,6 @@ export async function up(knex: Knex): Promise<void> {
       table.string("name").notNullable();
       table.string("email").notNullable();
       table.string("password").notNullable();
-      table.integer("semester").notNullable();
       table.enum("status", ["ACTIVE", "DELETED", "INACTIVE"]).notNullable();
       table.enum("type", ["student", "advisor", "admin", "root"]).notNullable();
       table.timestamps(true, true);
@@ -54,7 +53,7 @@ export async function up(knex: Knex): Promise<void> {
         .inTable("subjects")
         .notNullable();
       table
-        .enum("status", ["ACTIVE", "DELETED", "CANCELED", "FINISHED"])
+        .enum("status", ["PENDING", "ACCEPTED", "COMPLETED", "CANCELED"])
         .notNullable();
       table.string("location").notNullable();
       table.string("problem_description").notNullable();
@@ -83,6 +82,7 @@ export async function up(knex: Knex): Promise<void> {
         .references("id")
         .inTable("users")
         .onDelete("SET NULL");
+      table.timestamps(true, true);
     })
     .createTable("questions", function (table) {
       table.uuid("id").primary();
@@ -90,6 +90,7 @@ export async function up(knex: Knex): Promise<void> {
       table.enum("type", ["scale", "text", "boolean"]);
       table.integer("order").notNullable();
       table.enum("survey_type", ["advisor", "student"]);
+      table.timestamps(true, true);
     })
     .createTable("answers", function (table) {
       table.uuid("id").primary();
@@ -104,21 +105,26 @@ export async function up(knex: Knex): Promise<void> {
         .references("id")
         .inTable("questions")
         .notNullable();
+      table.timestamps(true, true);
     })
     .createTable("career-subject", function (table) {
       table.uuid("id").primary();
       table.uuid("id_career").references("id").inTable("careers");
       table.uuid("id_subject").references("id").inTable("subjects");
+      table.timestamps(true, true);
     })
     .createTable("users-career", function (table) {
       table.uuid("id").primary();
       table.uuid("id_user").references("id").inTable("users");
       table.uuid("id_career").references("id").inTable("careers");
+      table.integer("semester").notNullable;
+      table.timestamps(true, true);
     })
     .createTable("users-schedule", function (table) {
       table.uuid("id").primary();
       table.uuid("id_user").references("id").inTable("users");
       table.uuid("id_schedule").references("id").inTable("schedules");
+      table.timestamps(true, true);
     });
 }
 
