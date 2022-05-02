@@ -1,22 +1,11 @@
-<<<<<<< HEAD
-export const getController = () => {};
-=======
->>>>>>> 27ca3d57425911fece01127dec78f9f2ac2a32b2
 import { Request, Response } from "express";
 import db from "../../../db/db";
 
 enum EStatus {
-<<<<<<< HEAD
   PENDING = "PENDING",
   ACCEPTED = "ACCEPTED",
   COMPLETED = "COMPLETED",
   CANCELED = "CANCELED",
-=======
-  ACTIVE = "ACTIVE",
-  DELETED = "DELETED",
-  CANCELED = "CANCELED",
-  FINISHED = "FINISHED",
->>>>>>> 27ca3d57425911fece01127dec78f9f2ac2a32b2
 }
 interface IAppointmentData extends IAppointmentDataMod {
   id: string;
@@ -80,19 +69,14 @@ export const getStatus = async (req: Request, res: Response) => {
   try {
     const adminFirstAppointment: any = await db
       .first("*")
-      .from("appointments")
+      .from("users")
       .join(
         "appointments-user",
-        "appointments.id",
+        "users.id",
         "=",
-        "appointments-user.id_appointment"
+        "appointments-user.id_student"
       )
-<<<<<<< HEAD
-      .where({ status: "PENDING", "appointments-user.id_admin": id })
-=======
-      .where({ status: "ACTIVE", "appointments-user.id_admin": id })
->>>>>>> 27ca3d57425911fece01127dec78f9f2ac2a32b2
-      .orderBy("appointments.created_at", "desc");
+      .where("appointments-user.id_student", id as string);
     res.json(adminFirstAppointment);
     res.statusCode = 200;
   } catch (error) {

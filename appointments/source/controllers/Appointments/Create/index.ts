@@ -23,7 +23,7 @@ export const createController = async (
     await db("appointments").insert({
       id: newAppointmentId,
       date: new Date(Date.parse(date)),
-      status: Status.ACTIVE,
+      status: EStatusAppointment.PENDING,
       location: "",
       id_subject: idSubject,
       problem_description: problemDescription,
