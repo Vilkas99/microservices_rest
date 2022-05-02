@@ -8,11 +8,10 @@ export const getUserData = async (req: Request, res: Response) => {
     let userQuery: any;
     userQuery = await db("users").where({ id: id });
     let userData = userQuery[0];
-    let data = res.json({
+    res.json({
       status: "OK",
       user: userData,
     });
-    res.send(data);
   } catch (error) {
     res.send(error);
   }
