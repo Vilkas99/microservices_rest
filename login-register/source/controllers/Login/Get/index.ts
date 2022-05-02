@@ -1,17 +1,15 @@
 import { Request, Response, NextFunction } from "express";
 import db from "../../../db/db";
 
-interface IUserLoginData {
-  email: string;
-  password: string;
-}
-
 export const getUserLogin = async (req: Request, res: Response) => {
-  const { email, password }: IUserLoginData = req.body;
+  const { email, password } = req.query;
 
   try {
     let curUser: any;
-    curUser = await db("users").where({ email: email, password: password });
+    curUser = await db("users").where({
+      email: email as string,
+      password: password as string,
+    });
 
     console.log(curUser);
     if (curUser.length == 0) {

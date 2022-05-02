@@ -1,11 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import db from "../../../db/db";
 
-interface IUserGetData {
-  id: string;
-}
 export const getUserData = async (req: Request, res: Response) => {
-  const { id }: IUserGetData = req.body;
+  const { id } = req.query;
 
   try {
     let userQuery: any;
