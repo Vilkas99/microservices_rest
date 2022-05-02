@@ -2,10 +2,10 @@ import { Request, Response, NextFunction } from "express";
 import db from "../../../db/db";
 
 enum EStatus {
-  ACTIVE = "ACTIVE",
-  DELETED = "DELETED",
+  PENDING = "PENDING",
+  ACCEPTED = "ACCEPTED",
+  COMPLETED = "COMPLETED",
   CANCELED = "CANCELED",
-  FINISHED = "FINISHED",
 }
 interface IAppointmentData extends IAppointmentDataMod {
   id: string;
@@ -14,7 +14,7 @@ interface IAppointmentData extends IAppointmentDataMod {
 }
 
 interface IAppointmentDataMod {
-  date?: string | Date | Date;
+  date?: string | Date;
   id_subject?: string;
   status?: EStatus;
   location?: string;
