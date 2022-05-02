@@ -1,12 +1,22 @@
+<<<<<<< HEAD
 export const getController = () => {};
+=======
+>>>>>>> 27ca3d57425911fece01127dec78f9f2ac2a32b2
 import { Request, Response } from "express";
 import db from "../../../db/db";
 
 enum EStatus {
+<<<<<<< HEAD
   PENDING = "PENDING",
   ACCEPTED = "ACCEPTED",
   COMPLETED = "COMPLETED",
   CANCELED = "CANCELED",
+=======
+  ACTIVE = "ACTIVE",
+  DELETED = "DELETED",
+  CANCELED = "CANCELED",
+  FINISHED = "FINISHED",
+>>>>>>> 27ca3d57425911fece01127dec78f9f2ac2a32b2
 }
 interface IAppointmentData extends IAppointmentDataMod {
   id: string;
@@ -77,7 +87,11 @@ export const getStatus = async (req: Request, res: Response) => {
         "=",
         "appointments-user.id_appointment"
       )
+<<<<<<< HEAD
       .where({ status: "PENDING", "appointments-user.id_admin": id })
+=======
+      .where({ status: "ACTIVE", "appointments-user.id_admin": id })
+>>>>>>> 27ca3d57425911fece01127dec78f9f2ac2a32b2
       .orderBy("appointments.created_at", "desc");
     res.json(adminFirstAppointment);
     res.statusCode = 200;

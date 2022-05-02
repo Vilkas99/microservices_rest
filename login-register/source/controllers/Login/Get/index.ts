@@ -17,7 +17,7 @@ export const getUserLogin = async (req: Request, res: Response) => {
       console.log("Correo y/o contraseña incorrectos");
     } else {
       console.log("Inicio de sesión exitoso");
-      const curUserId = console.log(curUser[0].id);
+      const curUserId = curUser[0].id;
       res.send(curUserId);
     }
   } catch (error) {
