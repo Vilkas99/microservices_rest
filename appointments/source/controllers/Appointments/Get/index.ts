@@ -47,10 +47,26 @@ export const getAdmin = async (req: Request, res: Response) => {
 
   try {
     const adminFirstAppointment: any = await db
-      .first("*")
+      .first(
+        "appointments.id",
+        "appointments.date",
+        "appointments.id_subject",
+        "appointments.status",
+        "appointments.location",
+        "appointments.problem_description",
+        "appointments.photo_url",
+        "appointments.created_at",
+        "appointments.updated_at"
+      )
       .from("appointments")
-      .where("id", id as string)
-      .orderBy("created_at", "desc");
+      .join(
+        "appointments-user",
+        "appointments.id",
+        "=",
+        "appointments-user.id_appointment"
+      )
+      .where("appointments-user.id_student", id as string)
+      .orderBy("appointments.created_at", "desc");
     res.json(adminFirstAppointment);
     console.log(adminFirstAppointment);
     res.statusCode = 200;
@@ -68,15 +84,29 @@ export const getStatus = async (req: Request, res: Response) => {
 
   try {
     const adminFirstAppointment: any = await db
-      .first("*")
-      .from("users")
+      .first(
+        "appointments.id",
+        "appointments.date",
+        "appointments.id_subject",
+        "appointments.status",
+        "appointments.location",
+        "appointments.problem_description",
+        "appointments.photo_url",
+        "appointments.created_at",
+        "appointments.updated_at"
+      )
+      .from("appointments")
       .join(
         "appointments-user",
-        "users.id",
+        "appointments.id",
         "=",
-        "appointments-user.id_student"
+        "appointments-user.id_appointment"
       )
-      .where("appointments-user.id_student", id as string);
+      .where({
+        "appointments-user.id_student": id as string,
+        "appointments.status": "PENDING",
+      })
+      .orderBy("appointments.created_at", "desc");
     res.json(adminFirstAppointment);
     res.statusCode = 200;
   } catch (error) {
