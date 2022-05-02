@@ -1,8 +1,10 @@
+import { getUserLogin } from "../../controllers/Login/Get";
+
 const express = require("express");
 const router = express.Router();
 
-router.get("/", () => {});
+router.get("/get", getUserLogin);
 router.post("/", () => {});
-router.patch("", () => {});
+router.patch("/", () => {});
 
 module.exports = router;
