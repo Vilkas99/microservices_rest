@@ -19,11 +19,10 @@ export const getUserLogin = async (req: Request, res: Response) => {
     } else {
       console.log("Inicio de sesión exitoso");
       const curUserId = curUser[0].id;
-      let data = res.json({
+      res.json({
         status: "OK",
         userId: curUserId,
       });
-      res.send(data);
     }
   } catch (error) {
     res.send(error);

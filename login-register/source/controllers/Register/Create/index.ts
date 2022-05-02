@@ -96,11 +96,10 @@ export const createUser = async (req: Request, res: Response) => {
         });
       }
     }
-    let data = res.json({
+    res.json({
       status: "OK",
       userId: newUserId,
     });
-    res.send(data);
   } catch (error) {
     console.log("ERROR AL CREAR USUARIO");
     res.send(error);
