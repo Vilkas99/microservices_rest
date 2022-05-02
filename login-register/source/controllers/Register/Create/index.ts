@@ -32,7 +32,6 @@ interface INewUserSchedule {
   period: Number;
 }
 export const createUser = async (req: Request, res: Response) => {
-  console.log("CREANDO NUEVO USUARIO...");
   //Create user
   const {
     name,
@@ -61,12 +60,13 @@ export const createUser = async (req: Request, res: Response) => {
     res.sendStatus(200);
     //Insert user data in careers table if type is advisor or student
     if (EType.student === type || EType.advisor === type) {
-      console.log("INSERTANDO CARRERA DEL USUARIO...");
       await db("users-career").insert({
         id: uuid(),
         id_user: newUserId,
         id_career: career,
         semester: semester,
+        created_at: new Date(),
+        updated_at: new Date(),
       });
       if (careerDD != undefined) {
         await db("users-career").insert({
@@ -74,6 +74,8 @@ export const createUser = async (req: Request, res: Response) => {
           id_user: newUserId,
           id_career: careerDD,
           semester: semesterDD,
+          created_at: new Date(),
+          updated_at: new Date(),
         });
       }
     }
@@ -94,6 +96,7 @@ export const createUser = async (req: Request, res: Response) => {
         });
       }
     }
+    res.send(newUserId);
   } catch (error) {
     console.log("ERROR AL CREAR USUARIO");
     res.send(error);

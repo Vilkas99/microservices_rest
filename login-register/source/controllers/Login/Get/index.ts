@@ -7,7 +7,6 @@ interface IUserLoginData {
 }
 
 export const getUserLogin = async (req: Request, res: Response) => {
-  console.log("VERIFICANDO CREDENCIALES");
   const { email, password }: IUserLoginData = req.body;
 
   try {
@@ -19,8 +18,9 @@ export const getUserLogin = async (req: Request, res: Response) => {
       res.sendStatus(200);
       console.log("Correo y/o contraseña incorrectos");
     } else {
-      res.sendStatus(200);
       console.log("Inicio de sesión exitoso");
+      const curUserId = console.log(curUser[0].id);
+      res.send(curUserId);
     }
   } catch (error) {
     res.send(error);
