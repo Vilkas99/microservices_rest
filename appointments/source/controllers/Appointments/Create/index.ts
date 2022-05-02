@@ -20,10 +20,11 @@ export const createController = async (
   let newAppointmentId = uuidv4();
   try {
     // TODO: IMPORTANTE Sanitizar las entradas, especialemente la de problem_description
+    let errorInAppointmentsUser;
     await db("appointments").insert({
       id: newAppointmentId,
       date: new Date(Date.parse(date)),
-      status: Status.ACTIVE,
+      status: EStatusAppointment.PENDING,
       location: "",
       id_subject: idSubject,
       problem_description: problemDescription,
@@ -39,10 +40,12 @@ export const createController = async (
         id_admin: null,
       });
     } catch (error) {
-      res.send(error);
+      errorInAppointmentsUser = error;
       console.error(error);
     }
-
+    if (errorInAppointmentsUser) {
+      throw errorInAppointmentsUser;
+    }
     res.status(200).json({ newAppointmentId: newAppointmentId });
   } catch (error) {
     res.send(error);
