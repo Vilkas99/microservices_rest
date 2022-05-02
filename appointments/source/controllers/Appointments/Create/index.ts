@@ -10,11 +10,11 @@ export const createController = async (
   const { idPetitioner, date, idSubject, problemDescription, image } =
     req.body!;
 
-  enum Status {
-    ACTIVE = "ACTIVE",
-    DELETED = "DELETED",
+  enum EStatusAppointment {
+    PENDING = "PENDING",
+    ACCEPTED = "ACCEPTED",
+    COMPLETED = "COMPLETED",
     CANCELED = "CANCELED",
-    FINISHED = "FINISHED",
   }
 
   let newAppointmentId = uuidv4();
