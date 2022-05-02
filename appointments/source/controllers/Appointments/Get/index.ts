@@ -130,7 +130,6 @@ export const getStatus = async (req: Request, res: Response) => {
 // Todas las asesorías dependiendo del tipo de usuario
 
 export const getAll = async (req: Request, res: Response) => {
-  console.log("GET :D TODO FUNCIONA");
   const { id, id_type } = req.query;
   let columna: string;
   if (id_type == "admin") {
@@ -152,6 +151,7 @@ export const getAll = async (req: Request, res: Response) => {
         "appointments-user.id_appointment"
       )
       .where(columna, id as string);
+
     res.json(adminFirstAppointment);
     res.statusCode = 200;
   } catch (error) {
