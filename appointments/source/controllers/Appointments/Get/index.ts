@@ -47,11 +47,11 @@ export const getAdmin = async (req: Request, res: Response) => {
 
   let columna: string;
   if (id_type == "admin") {
-    columna = "ACTIVE";
+    columna = "PENDING";
   } else if (id_type == "advisor") {
-    columna = "PENDING";
+    columna = "ACCEPTED";
   } else {
-    columna = "PENDING";
+    columna = "ACCEPTED";
   }
 
   try {
