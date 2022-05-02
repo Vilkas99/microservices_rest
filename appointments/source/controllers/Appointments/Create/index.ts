@@ -48,6 +48,7 @@ export const createController = async (
     }
     res.status(200).json({ newAppointmentId: newAppointmentId });
   } catch (error) {
+    res.status(500);
     res.send(error);
     console.error(error);
   }
