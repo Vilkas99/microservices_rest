@@ -43,7 +43,16 @@ interface IGetAppointment {
 
 export const getAdmin = async (req: Request, res: Response) => {
   console.log("GET :D ADMIN FUNCIONA");
-  const id = req.query["id"];
+  const { id, id_type } = req.query;
+
+  let columna: string;
+  if (id_type == "admin") {
+    columna = "ACTIVE";
+  } else if (id_type == "advisor") {
+    columna = "PENDING";
+  } else {
+    columna = "PENDING";
+  }
 
   try {
     const adminFirstAppointment: any = await db
@@ -65,7 +74,10 @@ export const getAdmin = async (req: Request, res: Response) => {
         "=",
         "appointments-user.id_appointment"
       )
-      .where("appointments-user.id_student", id as string)
+      .where({
+        "appointments-user.id_student": id as string,
+        "appointments.status": columna,
+      })
       .orderBy("appointments.created_at", "desc");
     res.json(adminFirstAppointment);
     console.log(adminFirstAppointment);
