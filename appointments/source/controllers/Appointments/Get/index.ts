@@ -46,12 +46,16 @@ export const getAdmin = async (req: Request, res: Response) => {
   const { id, id_type } = req.query;
 
   let columna: string;
+  let value: string;
   if (id_type == "admin") {
     columna = "PENDING";
+    value = "appointments-user.id_admin";
   } else if (id_type == "advisor") {
     columna = "ACCEPTED";
+    value = "appointments-user.id_advisor";
   } else {
     columna = "ACCEPTED";
+    value = "appointments-user.id_student";
   }
 
   try {
@@ -74,10 +78,8 @@ export const getAdmin = async (req: Request, res: Response) => {
         "=",
         "appointments-user.id_appointment"
       )
-      .where({
-        "appointments-user.id_student": id as string,
-        "appointments.status": columna,
-      })
+      .where("appointments.status", columna)
+      .where(value, id as string)
       .orderBy("appointments.created_at", "desc");
     res.json(adminFirstAppointment);
     console.log(adminFirstAppointment);
@@ -130,28 +132,38 @@ export const getStatus = async (req: Request, res: Response) => {
 // Todas las asesorías dependiendo del tipo de usuario
 
 export const getAll = async (req: Request, res: Response) => {
+  console.log("GET :D TODO FUNCIONA MUY BIEN");
   const { id, id_type } = req.query;
   let columna: string;
   if (id_type == "admin") {
-    columna = "appointments-user.id_admin";
+    columna = "b.id_admin";
   } else if (id_type == "advisor") {
-    columna = "appointments-user.id_advisor";
+    columna = "b.id_advisor";
   } else {
-    columna = "appointments-user.id_student";
+    columna = "b.id_student";
   }
 
   try {
-    const adminFirstAppointment: any = await db
-      .select("*")
-      .from("appointments")
-      .join(
-        "appointments-user",
-        "appointments.id",
-        "=",
-        "appointments-user.id_appointment"
+    const adminFirstAppointment: any = await db({
+      a: "appointments",
+      b: "appointments-user",
+      c: "subjects",
+      d: "users",
+      e: "questions",
+    })
+      .select(
+        "a.id",
+        "a.date",
+        "b.id_advisor",
+        "e.title as asesor",
+        "c.name as materia",
+        "d.name as usuario",
+        "a.status"
       )
+      .where("a.id", db.raw("??", ["b.id_appointment"]))
+      .where("b.id_student", db.raw("??", ["d.id"]))
+      .where("a.id_subject", db.raw("??", ["c.id"]))
       .where(columna, id as string);
-
     res.json(adminFirstAppointment);
     res.statusCode = 200;
   } catch (error) {

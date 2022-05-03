@@ -58,7 +58,7 @@ export const createUser = async (req: Request, res: Response) => {
       created_at: new Date(),
       updated_at: new Date(),
     });
-    res.sendStatus(200);
+
     //Insert user data in careers table if type is advisor or student
     if (EType.student === type || EType.advisor === type) {
       await db("users-career").insert({
