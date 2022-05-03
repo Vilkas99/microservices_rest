@@ -130,28 +130,36 @@ export const getStatus = async (req: Request, res: Response) => {
 // Todas las asesorías dependiendo del tipo de usuario
 
 export const getAll = async (req: Request, res: Response) => {
+  console.log("GET :D TODO FUNCIONA MUY BIEN");
   const { id, id_type } = req.query;
   let columna: string;
   if (id_type == "admin") {
-    columna = "appointments-user.id_admin";
+    columna = "b.id_admin";
   } else if (id_type == "advisor") {
-    columna = "appointments-user.id_advisor";
+    columna = "b.id_advisor";
   } else {
-    columna = "appointments-user.id_student";
+    columna = "b.id_student";
   }
 
   try {
-    const adminFirstAppointment: any = await db
-      .select("*")
-      .from("appointments")
-      .join(
-        "appointments-user",
-        "appointments.id",
-        "=",
-        "appointments-user.id_appointment"
+    const adminFirstAppointment: any = await db({
+      a: "appointments",
+      b: "appointments-user",
+      c: "subjects",
+      d: "users",
+    })
+      .select(
+        "a.id",
+        "a.date",
+        "b.id_advisor",
+        "c.name as materia",
+        "d.name as usuario",
+        "a.status"
       )
+      .where("a.id", db.raw("??", ["b.id_appointment"]))
+      .where("b.id_student", db.raw("??", ["d.id"]))
+      .where("a.id_subject", db.raw("??", ["c.id"]))
       .where(columna, id as string);
-
     res.json(adminFirstAppointment);
     res.statusCode = 200;
   } catch (error) {
