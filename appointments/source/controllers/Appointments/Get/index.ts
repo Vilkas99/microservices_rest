@@ -46,12 +46,16 @@ export const getAdmin = async (req: Request, res: Response) => {
   const { id, id_type } = req.query;
 
   let columna: string;
+  let value: string;
   if (id_type == "admin") {
     columna = "PENDING";
+    value = "appointments-user.id_admin";
   } else if (id_type == "advisor") {
     columna = "ACCEPTED";
+    value = "appointments-user.id_advisor";
   } else {
     columna = "ACCEPTED";
+    value = "appointments-user.id_student";
   }
 
   try {
@@ -74,10 +78,8 @@ export const getAdmin = async (req: Request, res: Response) => {
         "=",
         "appointments-user.id_appointment"
       )
-      .where({
-        "appointments-user.id_student": id as string,
-        "appointments.status": columna,
-      })
+      .where("appointments.status", columna)
+      .where(value, id as string)
       .orderBy("appointments.created_at", "desc");
     res.json(adminFirstAppointment);
     console.log(adminFirstAppointment);
@@ -152,6 +154,7 @@ export const getAll = async (req: Request, res: Response) => {
       .select(
         "a.id",
         "a.date",
+        "b.id_advisor",
         "e.title as asesor",
         "c.name as materia",
         "d.name as usuario",

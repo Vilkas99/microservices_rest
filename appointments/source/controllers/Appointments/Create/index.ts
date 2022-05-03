@@ -37,7 +37,7 @@ export const createController = async (
         id_appointment: newAppointmentId,
         id_student: idPetitioner,
         id_advisor: null,
-        id_admin: "b4753ce1-0332-4a25-80bb-f6b5962b492f",
+        id_admin: null,
       });
     } catch (error) {
       errorInAppointmentsUser = error;

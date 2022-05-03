@@ -6,6 +6,7 @@ export const updateDetailsController = async (req: Request, res: Response) => {
 
   const change = JSON.parse(`{"${fieldToBeChanged}": "${newValue}"}`);
   try {
+    console.log(id);
     console.log(fieldToBeChanged);
     console.log(newValue);
     await db("appointments-user").where("id_appointment", id).update(change);
