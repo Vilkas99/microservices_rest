@@ -147,11 +147,12 @@ export const getAll = async (req: Request, res: Response) => {
       b: "appointments-user",
       c: "subjects",
       d: "users",
+      e: "questions",
     })
       .select(
         "a.id",
         "a.date",
-        "b.id_advisor",
+        "e.title as asesor",
         "c.name as materia",
         "d.name as usuario",
         "a.status"
