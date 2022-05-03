@@ -13,6 +13,7 @@ export const getUserData = async (req: Request, res: Response) => {
       user: userData,
     });
   } catch (error) {
+    console.log(error);
     res.send(error);
   }
 };

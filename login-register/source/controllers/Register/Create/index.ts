@@ -32,6 +32,7 @@ interface INewUserSchedule {
   period: Number;
 }
 export const createUser = async (req: Request, res: Response) => {
+  console.log(req.body);
   //Create user
   const {
     name,
