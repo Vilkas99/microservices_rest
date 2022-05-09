@@ -40,7 +40,6 @@ interface IUpdateaAppointment {
 }
 
 export const updateController = async (req: Request, res: Response) => {
-  console.log("ME QUIEREN CONSUMIR");
   const { id, newValues, newIds }: IUpdateaAppointment = req.body;
 
   if (newValues?.date !== undefined && typeof newValues.date === "string") {

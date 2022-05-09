@@ -10,9 +10,6 @@ import { updateDetailsController } from "../../controllers/Appointments-User/Upd
 const express = require("express");
 const router = express.Router();
 
-router.get("/", () => {
-  console.log("getting info");
-});
 router.post("/", createController);
 router.patch("/", updateController);
 router.patch("/details", updateDetailsController);

@@ -2,8 +2,18 @@
 import http from "http";
 import express, { Express } from "express";
 
+//Databes
+import db from "./db/db";
+import { Model } from "objection";
+
+//Functions
+import { errorHandler } from "./utils/functions";
+
 //Enviroment dotenv
 require("dotenv").config();
+
+//Objection relation w / Knex
+Model.knex(db);
 
 var cors = require("cors");
 
@@ -25,12 +35,7 @@ router.use("/admin", example_routes);
 router.use("/appointment", appointment_routes);
 
 /** Error handling */
-router.use((req, res, next) => {
-  const error = new Error("not found");
-  return res.status(404).json({
-    message: error.message,
-  });
-});
+router.use(errorHandler);
 
 /** Server */
 const httpServer = http.createServer(router);
