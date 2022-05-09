@@ -170,6 +170,7 @@ export const getAll = async (req: Request, res: Response) => {
 
     addFinalInfo(fullInfo)
       .then((value) => {
+        console.log(value);
         res.json(value);
         res.statusCode = 200;
       })

@@ -20,7 +20,8 @@ class AppointmentUserModel extends Model {
             "id_subject",
             "status",
             "problem_description",
-            "photo_url"
+            "photo_url",
+            "location"
           ),
         join: {
           from: "appointments-user.id_appointment",
