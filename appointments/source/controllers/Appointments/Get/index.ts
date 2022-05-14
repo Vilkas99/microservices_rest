@@ -1,16 +1,22 @@
 import { Request, Response } from "express";
 import db from "../../../db/db";
 
+const AppointmentModel = require("../../../models/Appointment");
+const AppointmentUserModel = require("../../../models/AppointmentUser");
+const SubjectsModel = require("../../../models/Subjects");
+
 enum EStatus {
   PENDING = "PENDING",
   ACCEPTED = "ACCEPTED",
   COMPLETED = "COMPLETED",
   CANCELED = "CANCELED",
 }
-interface IAppointmentData extends IAppointmentDataMod {
-  id: string;
-  created_at: Date;
-  updated_at: Date;
+
+const enum EUserType {
+  advisor = "advisor",
+  student = "student",
+  admin = "admin",
+  root = "root",
 }
 
 interface IAppointmentDataMod {
@@ -22,20 +28,10 @@ interface IAppointmentDataMod {
   photo_url?: string;
 }
 
-interface IIdsAppointmentData extends IIdsAppointmentDataMod {
-  id: string;
-  id_appointment: string;
-}
-
 interface IIdsAppointmentDataMod {
   id_student?: string;
   id_advisor?: string;
   id_admin?: string;
-}
-
-interface IGetAppointment {
-  id: string;
-  id_type?: "admin" | "student" | "advisor";
 }
 
 // ---------------------- PRIMERA -------------------------------------------
@@ -131,40 +127,74 @@ export const getStatus = async (req: Request, res: Response) => {
 // ---------------------- TERCERA -------------------------------------------
 // Todas las asesorías dependiendo del tipo de usuario
 
-export const getAll = async (req: Request, res: Response) => {
-  console.log("GET :D TODO FUNCIONA MUY BIEN");
-  const { id, id_type } = req.query;
-  let columna: string;
-  if (id_type == "admin") {
-    columna = "b.id_admin";
-  } else if (id_type == "advisor") {
-    columna = "b.id_advisor";
-  } else {
-    columna = "b.id_student";
+const getSubject = async (id: string) => {
+  const mySubject = await SubjectsModel.query().findById(id).select("name");
+  return mySubject;
+};
+
+const addFinalInfo = async (fullInfo: any) => {
+  const finalInfo: any = [];
+  for (const object of fullInfo) {
+    const id = object.appointment.id_subject;
+    let subject = await getSubject(id);
+    //TODO: Add semester to student profile
+    finalInfo.push({
+      subject: subject,
+      appointment: object.appointment,
+      student: object.student[0],
+      advisor: object.advisor[0],
+      admin: object.admin[0],
+    });
   }
+  return finalInfo;
+};
+
+export const getAll = async (req: Request, res: Response) => {
+  const { id, userType } = req.query;
+  try {
+    const column =
+      userType === EUserType.admin
+        ? "id_admin"
+        : userType === EUserType.advisor
+        ? "id_advisor"
+        : "id_student";
+
+    const fullInfo = await AppointmentUserModel.query()
+      .where({
+        [column]: id,
+      })
+      .withGraphFetched("appointment")
+      .withGraphFetched("student")
+      .withGraphFetched("advisor")
+      .withGraphFetched("admin");
+
+    addFinalInfo(fullInfo)
+      .then((value) => {
+        console.log(value);
+        res.json(value);
+        res.statusCode = 200;
+      })
+      .catch((e) => console.error(e));
+  } catch (error) {
+    res.send(error);
+  }
+};
+
+// ---------------------- Objection -------------------------------------------
+// Obtener los datos del appointment y del usuario
+export const getObjection = async (req: Request, res: Response) => {
+  const { id } = req.query;
 
   try {
-    const adminFirstAppointment: any = await db({
-      a: "appointments",
-      b: "appointments-user",
-      c: "subjects",
-      d: "users",
-      e: "questions",
-    })
-      .select(
-        "a.id",
-        "a.date",
-        "b.id_advisor",
-        "e.title as asesor",
-        "c.name as materia",
-        "d.name as usuario",
-        "a.status"
-      )
-      .where("a.id", db.raw("??", ["b.id_appointment"]))
-      .where("b.id_student", db.raw("??", ["d.id"]))
-      .where("a.id_subject", db.raw("??", ["c.id"]))
-      .where(columna, id as string);
-    res.json(adminFirstAppointment);
+    let info: any;
+
+    info = await AppointmentModel.query()
+      .findById(id)
+      .withGraphFetched("student")
+      .withGraphFetched("advisor")
+      .withGraphFetched("admin");
+
+    res.json(info);
     res.statusCode = 200;
   } catch (error) {
     res.send(error);
