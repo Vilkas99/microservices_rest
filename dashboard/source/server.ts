@@ -9,7 +9,6 @@ import { Model } from "objection";
 
 //Functions
 import { createEntryRedis, errorHandler } from "./utils/functions";
-import redisClient from "./redis";
 
 //Enviroment dotenv
 require("dotenv").config();
@@ -58,11 +57,6 @@ io.on("connection", async (socket) => {
   socket.on("initial", (data) => {
     console.log("Esta es la llave: ", data.myId);
     createEntryRedis(data.myId, socket.id);
-    redisClient.get(data.myId, (err: any, reply: any) => {
-      if (err) throw err;
-      console.log(reply);
-    });
-    console.log("TOTASL: ", socket.listenerCount("initial"));
   });
 });
 

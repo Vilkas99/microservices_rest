@@ -5,6 +5,8 @@ import {
 
 import { createNotification } from "../../controllers/Notification/Create";
 
+import { updateNotification } from "../../controllers/Notification/Update";
+
 const express = require("express");
 const router = express.Router();
 
@@ -13,9 +15,6 @@ router.get("/all", getAllNotifications);
 
 router.post("/", createNotification);
 
-/*
 router.patch("/", updateNotification);
-
-router.delete("/", deleteNotification);*/
 
 module.exports = router;
