@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import redisClient from "../../redis";
 
 const {
   ValidationError,
@@ -114,3 +115,22 @@ export function errorHandler(err: any, res: Response) {
     });
   }
 }
+
+export const paramNotPresent = (
+  param: string,
+  res: Response,
+  paramTitle: string
+) => {
+  if (param === "" || param === null || param === undefined) {
+    res.status(400).send(`${paramTitle} is not provided by the client.`);
+    return true;
+  }
+  return false;
+};
+
+export const createEntryRedis = (key: string, value: string) => {
+  redisClient.set(key, value, (err: any, reply: any) => {
+    if (err) throw err;
+    console.log(reply);
+  });
+};
