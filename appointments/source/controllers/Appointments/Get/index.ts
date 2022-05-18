@@ -38,7 +38,6 @@ interface IIdsAppointmentDataMod {
 // Endpoint que obtiene la asesoría más reciente de un admin
 
 export const getAdmin = async (req: Request, res: Response) => {
-  console.log("GET :D ADMIN FUNCIONA");
   const { id, id_type } = req.query;
 
   let columna: string;
@@ -78,7 +77,7 @@ export const getAdmin = async (req: Request, res: Response) => {
       .where(value, id as string)
       .orderBy("appointments.created_at", "desc");
     res.json(adminFirstAppointment);
-    console.log(adminFirstAppointment);
+
     res.statusCode = 200;
   } catch (error) {
     res.send(error);
@@ -89,7 +88,6 @@ export const getAdmin = async (req: Request, res: Response) => {
 // Endpoint que obtiene la asesoría activa más reciente de un admin
 
 export const getStatus = async (req: Request, res: Response) => {
-  console.log("GET :D ESTATUS FUNCIONA");
   const id = req.query["id"];
 
   try {
@@ -170,7 +168,6 @@ export const getAll = async (req: Request, res: Response) => {
 
     addFinalInfo(fullInfo)
       .then((value) => {
-        console.log(value);
         res.json(value);
         res.statusCode = 200;
       })
