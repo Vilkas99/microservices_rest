@@ -1,8 +1,12 @@
 import { Request, Response, NextFunction } from "express";
 import { uuid } from "uuidv4";
-
+import "objection-password";
 import db from "../../../db/db";
-//TODO: Considerar las inserciones a las tablas de usuario como user-schedule o user-career en este microservicio
+const UserModel = require("../../../models/User");
+const UserCareerModel = require("../../../models/UserCareer");
+const SchedulesModel = require("../../../models/Schedules");
+const UserScheduleModel = require("../../../models/UserSchedule");
+
 enum EType {
   student = "student",
   advisor = "advisor",
@@ -32,7 +36,6 @@ interface INewUserSchedule {
   period: Number;
 }
 export const createUser = async (req: Request, res: Response) => {
-  console.log(req.body);
   //Create user
   const {
     name,
@@ -48,59 +51,70 @@ export const createUser = async (req: Request, res: Response) => {
   }: INewUserData = req.body;
   try {
     let newUserId = uuid();
-    await db("users").insert({
-      id: newUserId,
-      name: name,
-      email: email,
-      password: password,
-      status: status,
-      type: type,
-      created_at: new Date(),
-      updated_at: new Date(),
-    });
-
-    //Insert user data in careers table if type is advisor or student
-    if (EType.student === type || EType.advisor === type) {
-      await db("users-career").insert({
-        id: uuid(),
-        id_user: newUserId,
-        id_career: career,
-        semester: semester,
+    let alreadyExists = await UserModel.query()
+      .select("email")
+      .where("email", email);
+    console.log(alreadyExists);
+    if (alreadyExists.length === 0) {
+      await UserModel.query().insert({
+        id: newUserId,
+        name: name,
+        email: email,
+        password: password,
+        status: status,
+        type: type,
         created_at: new Date(),
         updated_at: new Date(),
       });
-      if (careerDD != undefined) {
-        await db("users-career").insert({
+
+      //Insert user data in careers table if type is advisor or student
+      if (EType.student === type || EType.advisor === type) {
+        await UserCareerModel.query().insert({
           id: uuid(),
           id_user: newUserId,
-          id_career: careerDD,
-          semester: semesterDD,
+          id_career: career,
+          semester: semester,
           created_at: new Date(),
           updated_at: new Date(),
         });
+        if (careerDD != undefined) {
+          await UserCareerModel.query().insert({
+            id: uuid(),
+            id_user: newUserId,
+            id_career: careerDD,
+            semester: semesterDD,
+            created_at: new Date(),
+            updated_at: new Date(),
+          });
+        }
       }
-    }
-    //Create user schedules if type is advisor
-    if (EType.advisor === type && schedules != undefined) {
-      for (let i = 0; i < schedules.length; i++) {
-        let newScheduleId = uuid();
-        await db("schedules").insert({
-          id: newScheduleId,
-          start: schedules[i].start,
-          finish: schedules[i].finish,
-          period: schedules[i].period,
-        });
-        await db("users-schedule").insert({
-          id: uuid(),
-          id_user: newUserId,
-          id_schedule: newScheduleId,
-        });
+      //Create user schedules if type is advisor
+      if (EType.advisor === type && schedules != undefined) {
+        for (let i = 0; i < schedules.length; i++) {
+          let newScheduleId = uuid();
+          await SchedulesModel.query().insert({
+            id: newScheduleId,
+            start: schedules[i].start,
+            finish: schedules[i].finish,
+            period: schedules[i].period,
+          });
+          await UserScheduleModel.query().insert({
+            id: uuid(),
+            id_user: newUserId,
+            id_schedule: newScheduleId,
+          });
+        }
       }
+      res.json({
+        status: "OK",
+        userId: newUserId,
+      });
+    } else {
+      res.json({
+        status: "Bad request",
+        msg: "Email already exists",
+      });
     }
-    res.json({
-      status: "OK",
-      userId: newUserId,
-    });
   } catch (error) {
     console.log("ERROR AL CREAR USUARIO");
     res.send(error);

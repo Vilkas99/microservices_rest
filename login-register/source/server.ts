@@ -2,8 +2,12 @@
 import http from "http";
 import express, { Express } from "express";
 
+import db from "./db/db";
+import { Model } from "objection";
+
 //Enviroment dotenv
 require("dotenv").config();
+Model.knex(db);
 var cors = require("cors");
 
 //Routes
@@ -35,6 +39,7 @@ router.use((req, res, next) => {
 
 /** Server */
 const httpServer = http.createServer(router);
+
 const PORT: any = 6070;
 httpServer.listen(PORT, () =>
   console.log(`The server is running on port ${PORT}`)
