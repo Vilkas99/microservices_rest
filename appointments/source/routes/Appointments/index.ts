@@ -1,5 +1,6 @@
 import { updateController } from "../../controllers/Appointments/Update";
 import { createController } from "../../controllers/Appointments/Create";
+import { deleteAppointment } from "../../controllers/Appointments/Delete";
 import {
   getAdmin,
   getStatus,
@@ -16,5 +17,6 @@ router.patch("/details", updateDetailsController);
 router.get("/admin", getAdmin);
 router.get("/status", getStatus);
 router.get("/allAppointments", getAll);
+router.delete("/delete", deleteAppointment);
 
 module.exports = router;

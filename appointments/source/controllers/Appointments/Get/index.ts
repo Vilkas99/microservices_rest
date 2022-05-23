@@ -133,6 +133,9 @@ const getSubject = async (id: string) => {
 };
 
 const addFinalInfo = async (fullInfo: any) => {
+  if (fullInfo.lenght == 0) {
+    return "No hay datos";
+  }
   const finalInfo: any = [];
   for (const object of fullInfo) {
     const id = object.appointment.id_subject;
@@ -174,7 +177,10 @@ export const getAll = async (req: Request, res: Response) => {
         res.json(value);
         res.statusCode = 200;
       })
-      .catch((e) => console.error(e));
+      .catch((e) => {
+        console.error(e);
+        res.send(e);
+      });
   } catch (error) {
     res.send(error);
   }
