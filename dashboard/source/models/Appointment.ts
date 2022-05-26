@@ -7,6 +7,7 @@ class AppointmentModel extends Model {
 
   static get relationMappings(): RelationMappings | RelationMappingsThunk {
     const User = require("./User");
+    const PollReports = require("./PollReports");
 
     return {
       student: {
@@ -43,6 +44,14 @@ class AppointmentModel extends Model {
             to: "appointments-user.id_admin",
           },
           to: "users.id",
+        },
+      },
+      pollReports: {
+        relation: Model.HasManyRelation,
+        modelClass: PollReports,
+        join: {
+          from: "appointments.id",
+          to: "poll-reports.id_appointment",
         },
       },
     };

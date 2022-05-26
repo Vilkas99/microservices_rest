@@ -32,6 +32,7 @@ exports.io = io;
 
 //Routes
 const notification_routes = require("./routes/notifications");
+const poll_routes = require("./routes/Polls");
 /*
 const example_routes = require("./routes/Example");
 const appointment_routes = require("./routes/Appointments");
@@ -49,6 +50,7 @@ router.use("/notification", notification_routes);
 router.use("/admin", example_routes);
 router.use("/appointment", appointment_routes);
 */
+router.use("/push_poll", poll_routes);
 
 /** Error handling */
 router.use(errorHandler);
