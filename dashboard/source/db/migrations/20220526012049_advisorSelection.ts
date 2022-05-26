@@ -58,6 +58,12 @@ export async function up(knex: Knex): Promise<void> {
       table.enum("status", ["PENDING", "AVILABLE"]).notNullable();
       table.timestamps(true, true);
     })
+    .createTable("current_period", function (table) {
+      table.boolean("id").primary().defaultTo(true);
+      table.smallint("period").notNullable();
+      table.check("??", ["id"], "unique_entry_check");
+      table.check("?? >= 1 && ?? <= 3", ["period"], "valid_period_check");
+    })
     .then(function () {
       return knex.raw(GET_USERT_WEEKLY_CREDITED_HOURS);
     })
