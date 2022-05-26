@@ -38,7 +38,6 @@ interface IIdsAppointmentDataMod {
 // Endpoint que obtiene la asesoría más reciente de un admin
 
 export const getAdmin = async (req: Request, res: Response) => {
-  console.log("GET :D ADMIN FUNCIONA");
   const { id, id_type } = req.query;
 
   let columna: string;
@@ -78,7 +77,7 @@ export const getAdmin = async (req: Request, res: Response) => {
       .where(value, id as string)
       .orderBy("appointments.created_at", "desc");
     res.json(adminFirstAppointment);
-    console.log(adminFirstAppointment);
+
     res.statusCode = 200;
   } catch (error) {
     res.send(error);
@@ -89,7 +88,6 @@ export const getAdmin = async (req: Request, res: Response) => {
 // Endpoint que obtiene la asesoría activa más reciente de un admin
 
 export const getStatus = async (req: Request, res: Response) => {
-  console.log("GET :D ESTATUS FUNCIONA");
   const id = req.query["id"];
 
   try {
@@ -149,8 +147,26 @@ const addFinalInfo = async (fullInfo: any) => {
   return finalInfo;
 };
 
+interface IQueryGetAll {
+  id: string;
+  userType: EUserType;
+  full?: boolean;
+  limit?: number;
+  orderBy?: "desc" | "asc" | "";
+}
+
 export const getAll = async (req: Request, res: Response) => {
-  const { id, userType } = req.query;
+  let { id, userType, full, limit, orderBy } =
+    req.query as unknown as IQueryGetAll;
+
+  if (full === undefined || full === null) {
+    full = false;
+  }
+
+  if (orderBy !== "" || orderBy === undefined) {
+    orderBy = "desc";
+  }
+
   try {
     const column =
       userType === EUserType.admin
@@ -159,23 +175,60 @@ export const getAll = async (req: Request, res: Response) => {
         ? "id_advisor"
         : "id_student";
 
-    const fullInfo = await AppointmentUserModel.query()
-      .where({
-        [column]: id,
-      })
-      .withGraphFetched("appointment")
-      .withGraphFetched("student")
-      .withGraphFetched("advisor")
-      .withGraphFetched("admin");
+    if (full) {
+      let fullInfo;
+      if (limit !== undefined) {
+        fullInfo = await AppointmentUserModel.query()
+          .where({
+            [column]: id,
+          })
+          .orderBy("created_at", orderBy)
+          .withGraphFetched("appointment")
+          .withGraphFetched("student")
+          .withGraphFetched("advisor")
+          .withGraphFetched("admin")
+          .withGraphFetched("subject")
+          .limit(limit);
+      } else {
+        fullInfo = await AppointmentUserModel.query()
+          .where({
+            [column]: id,
+          })
+          .orderBy("created_at", orderBy)
+          .withGraphFetched("appointment")
+          .withGraphFetched("student")
+          .withGraphFetched("advisor")
+          .withGraphFetched("admin")
+          .withGraphFetched("subject");
+      }
 
-    addFinalInfo(fullInfo)
-      .then((value) => {
-        console.log(value);
-        res.json(value);
-        res.statusCode = 200;
-      })
-      .catch((e) => console.error(e));
+      addFinalInfo(fullInfo)
+        .then((value) => {
+          res.json(value);
+          res.statusCode = 200;
+        })
+        .catch((e) => console.error(e));
+    } else {
+      let info;
+      if (limit !== undefined) {
+        info = await AppointmentUserModel.query()
+          .where({ [column]: id })
+          .orderBy("created_at", orderBy)
+          .withGraphFetched("subject")
+          .withGraphFetched("appointment")
+          .limit(limit);
+      } else {
+        info = await AppointmentUserModel.query()
+          .where({ [column]: id })
+          .orderBy("created_at", orderBy)
+          .withGraphFetched("subject")
+          .withGraphFetched("appointment");
+      }
+
+      res.json(info).status(200);
+    }
   } catch (error) {
+    console.error(error);
     res.send(error);
   }
 };

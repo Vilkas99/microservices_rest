@@ -1,13 +1,14 @@
-/** source/server.ts */
+//Libraries
 import http from "http";
 import express, { Express } from "express";
+import { Server as WebSocketServer } from "socket.io";
 
 //Databes
 import db from "./db/db";
 import { Model } from "objection";
 
 //Functions
-import { errorHandler } from "./utils/functions";
+import { createEntryRedis, errorHandler } from "./utils/functions";
 
 //Enviroment dotenv
 require("dotenv").config();
@@ -17,14 +18,25 @@ Model.knex(db);
 
 var cors = require("cors");
 
+//Router creation
+const router: Express = express();
+
+/** Server */
+const httpServer = http.createServer(router);
+const io = new WebSocketServer(httpServer, {
+  cors: {
+    origin: "http://localhost:3000", //TODO: Modificar por la URL de despliegue del front
+  },
+});
+exports.io = io;
+
 //Routes
+const notification_routes = require("./routes/notifications");
+const schedules_routes = require("./routes/schedules");
 /*
 const example_routes = require("./routes/Example");
 const appointment_routes = require("./routes/Appointments");
 */
-
-//Router creation
-const router: Express = express();
 
 /** Parse the request */
 router.use(express.urlencoded({ extended: false }));
@@ -33,6 +45,8 @@ router.use(express.json());
 
 router.use(cors());
 //Apply routes
+router.use("/notification", notification_routes);
+router.use("/schedule", schedules_routes);
 /*
 router.use("/admin", example_routes);
 router.use("/appointment", appointment_routes);
@@ -41,8 +55,13 @@ router.use("/appointment", appointment_routes);
 /** Error handling */
 router.use(errorHandler);
 
-/** Server */
-const httpServer = http.createServer(router);
+io.on("connection", async (socket) => {
+  socket.on("initial", (data) => {
+    console.log("Esta es la llave: ", data.myId);
+    createEntryRedis(data.myId, socket.id);
+  });
+});
+
 const PORT: any = process.env.PORT ?? 6090;
 httpServer.listen(PORT, () =>
   console.log(`The server is running on port ${PORT}`)
