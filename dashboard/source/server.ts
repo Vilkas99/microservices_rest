@@ -33,6 +33,7 @@ exports.io = io;
 //Routes
 const notification_routes = require("./routes/notifications");
 const poll_routes = require("./routes/Polls");
+const schedules_routes = require("./routes/schedules");
 /*
 const example_routes = require("./routes/Example");
 const appointment_routes = require("./routes/Appointments");
@@ -46,6 +47,7 @@ router.use(express.json());
 router.use(cors());
 //Apply routes
 router.use("/notification", notification_routes);
+router.use("/schedule", schedules_routes);
 /*
 router.use("/admin", example_routes);
 router.use("/appointment", appointment_routes);

@@ -1,5 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import db from "../../../db/db";
+import { ENotificationType } from "../../../utils/enums";
+import { createNotification } from "../../../utils/functions";
 
 enum EStatus {
   PENDING = "PENDING",
@@ -7,13 +9,13 @@ enum EStatus {
   COMPLETED = "COMPLETED",
   CANCELED = "CANCELED",
 }
-interface IAppointmentData extends IAppointmentDataMod {
-  id: string;
-  created_at: Date;
-  updated_at: Date;
+
+interface IIdsAppointmentDataMod {
+  id_advisor?: string;
+  id_admin?: string;
 }
 
-interface IAppointmentDataMod {
+interface IBaseChanges {
   date?: string | Date;
   id_subject?: string;
   status?: EStatus;
@@ -22,41 +24,84 @@ interface IAppointmentDataMod {
   photo_url?: string;
 }
 
-interface IIdsAppointmentData extends IIdsAppointmentDataMod {
-  id: string;
-  id_appointment: string;
-}
-
-interface IIdsAppointmentDataMod {
-  id_student?: string;
-  id_advisor?: string;
-  id_admin?: string;
-}
-
 interface IUpdateaAppointment {
   id: string;
-  newValues?: IAppointmentDataMod;
-  newIds?: IIdsAppointmentDataMod;
+  idStudent: string;
+  baseChanges: IBaseChanges;
+  detailChanges: IIdsAppointmentDataMod;
 }
 
-export const updateController = async (req: Request, res: Response) => {
-  const { id, newValues, newIds }: IUpdateaAppointment = req.body;
+const notificationForStudent = (
+  baseChanges: IBaseChanges,
+  idStudent: string
+) => {
+  if (baseChanges.status === EStatus.ACCEPTED) {
+    createNotification(
+      "Asesoría aceptada",
+      "Tienes una Asesoría Aceptada",
+      idStudent,
+      ENotificationType.APPOINTMENT_ACCEPTED
+    );
+  } else if (baseChanges.status === EStatus.CANCELED) {
+    createNotification(
+      "Asesoría rechazada",
+      "Tu solicitud ha sido rechazada",
+      idStudent,
+      ENotificationType.APPOINTMENT_REJECTED
+    );
+  }
+};
 
-  if (newValues?.date !== undefined && typeof newValues.date === "string") {
-    newValues.date = new Date(Date.parse(newValues?.date as string));
+const notificationForUsers = (detailsChanges: IIdsAppointmentDataMod) => {
+  for (const key in detailsChanges) {
+    if (key === "id_advisor" && detailsChanges.id_advisor !== undefined) {
+      createNotification(
+        "Nueva Asesoría",
+        "Has sido asignado/a a una nueva asesoría",
+        detailsChanges.id_advisor,
+        ENotificationType.APPOINTMENT_ACCEPTED
+      );
+    } else if (key === "id_admin" && detailsChanges.id_admin !== undefined) {
+      createNotification(
+        "Nueva solicitud de asesoría",
+        "Has sido asignado/a a una nueva solicitud de asesoría.",
+        detailsChanges.id_admin,
+        ENotificationType.APPOINTMENT_ACCEPTED
+      );
+    }
+  }
+};
+
+export const updateController = async (req: Request, res: Response) => {
+  const { id, idStudent, baseChanges, detailChanges }: IUpdateaAppointment =
+    req.body;
+
+  //Update base Info
+  try {
+    await db("appointments").where("id", id).update(baseChanges);
+  } catch (error) {
+    res.send(error);
+    console.error(error);
+    return;
+  }
+
+  //Update details
+  try {
+    await db("appointments-user")
+      .where("id_appointment", id)
+      .update(detailChanges);
+  } catch (error) {
+    res.send(error);
+    return;
   }
 
   try {
-    await db("appointments").where("id", id).update(newValues);
-    res.sendStatus(200);
+    await notificationForStudent(baseChanges, idStudent);
+    await notificationForUsers(detailChanges);
   } catch (error) {
     res.send(error);
+    return;
   }
 
-  if (newIds !== undefined) {
-    const keysIds = Object.keys(newIds);
-    keysIds.map((key) => {
-      //TODO: Send notification to each id that will be changed
-    });
-  }
+  res.sendStatus(200);
 };

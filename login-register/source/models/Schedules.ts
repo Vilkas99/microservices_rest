@@ -1,4 +1,4 @@
-import { Model, RelationMappings, RelationMappingsThunk } from "objection";
+import { Model } from "objection";
 
 class SchedulesModel extends Model {
   static get tableName() {

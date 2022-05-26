@@ -8,7 +8,6 @@ class AppointmentUserModel extends Model {
   static get relationMappings(): RelationMappings | RelationMappingsThunk {
     const Appointment = require("./Appointment");
     const User = require("./User");
-    const Subject = require("./Subjects");
 
     return {
       appointment: {
@@ -32,7 +31,7 @@ class AppointmentUserModel extends Model {
       student: {
         relation: Model.HasManyRelation,
         modelClass: User,
-        filter: (query) => query.select("id", "name"),
+        filter: (query) => query.select("name"),
         join: {
           from: "appointments-user.id_student",
           to: "users.id",
@@ -41,7 +40,7 @@ class AppointmentUserModel extends Model {
       advisor: {
         relation: Model.HasManyRelation,
         modelClass: User,
-        filter: (query) => query.select("name", "id"),
+        filter: (query) => query.select("name"),
         join: {
           from: "appointments-user.id_advisor",
           to: "users.id",
@@ -50,22 +49,10 @@ class AppointmentUserModel extends Model {
       admin: {
         relation: Model.HasManyRelation,
         modelClass: User,
-        filter: (query) => query.select("name", "id"),
+        filter: (query) => query.select("name"),
         join: {
           from: "appointments-user.id_admin",
           to: "users.id",
-        },
-      },
-      subject: {
-        relation: Model.ManyToManyRelation,
-        modelClass: Subject,
-        join: {
-          from: "appointments-user.id_appointment",
-          through: {
-            from: "appointments.id",
-            to: "appointments.id_subject",
-          },
-          to: "subjects.id",
         },
       },
     };
