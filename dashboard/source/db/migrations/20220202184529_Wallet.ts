@@ -9,6 +9,10 @@ export async function up(knex: Knex): Promise<void> {
       table.string("password").notNullable();
       table.enum("status", ["ACTIVE", "DELETED", "INACTIVE"]).notNullable();
       table.enum("type", ["student", "advisor", "admin", "root"]).notNullable();
+      table
+        .json("configuration")
+        .defaultTo('{"theme":"light","lang":"es"}')
+        .notNullable();
       table.timestamps(true, true);
     })
     .createTable("notifications", function (table) {
