@@ -147,8 +147,26 @@ const addFinalInfo = async (fullInfo: any) => {
   return finalInfo;
 };
 
+interface IQueryGetAll {
+  id: string;
+  userType: EUserType;
+  full?: boolean;
+  limit?: number;
+  orderBy?: "desc" | "asc" | "";
+}
+
 export const getAll = async (req: Request, res: Response) => {
-  const { id, userType } = req.query;
+  let { id, userType, full, limit, orderBy } =
+    req.query as unknown as IQueryGetAll;
+
+  if (full === undefined || full === null) {
+    full = false;
+  }
+
+  if (orderBy !== "" || orderBy === undefined) {
+    orderBy = "desc";
+  }
+
   try {
     const column =
       userType === EUserType.admin
@@ -157,22 +175,60 @@ export const getAll = async (req: Request, res: Response) => {
         ? "id_advisor"
         : "id_student";
 
-    const fullInfo = await AppointmentUserModel.query()
-      .where({
-        [column]: id,
-      })
-      .withGraphFetched("appointment")
-      .withGraphFetched("student")
-      .withGraphFetched("advisor")
-      .withGraphFetched("admin");
+    if (full) {
+      let fullInfo;
+      if (limit !== undefined) {
+        fullInfo = await AppointmentUserModel.query()
+          .where({
+            [column]: id,
+          })
+          .orderBy("created_at", orderBy)
+          .withGraphFetched("appointment")
+          .withGraphFetched("student")
+          .withGraphFetched("advisor")
+          .withGraphFetched("admin")
+          .withGraphFetched("subject")
+          .limit(limit);
+      } else {
+        fullInfo = await AppointmentUserModel.query()
+          .where({
+            [column]: id,
+          })
+          .orderBy("created_at", orderBy)
+          .withGraphFetched("appointment")
+          .withGraphFetched("student")
+          .withGraphFetched("advisor")
+          .withGraphFetched("admin")
+          .withGraphFetched("subject");
+      }
 
-    addFinalInfo(fullInfo)
-      .then((value) => {
-        res.json(value);
-        res.statusCode = 200;
-      })
-      .catch((e) => console.error(e));
+      addFinalInfo(fullInfo)
+        .then((value) => {
+          res.json(value);
+          res.statusCode = 200;
+        })
+        .catch((e) => console.error(e));
+    } else {
+      let info;
+      if (limit !== undefined) {
+        info = await AppointmentUserModel.query()
+          .where({ [column]: id })
+          .orderBy("created_at", orderBy)
+          .withGraphFetched("subject")
+          .withGraphFetched("appointment")
+          .limit(limit);
+      } else {
+        info = await AppointmentUserModel.query()
+          .where({ [column]: id })
+          .orderBy("created_at", orderBy)
+          .withGraphFetched("subject")
+          .withGraphFetched("appointment");
+      }
+
+      res.json(info).status(200);
+    }
   } catch (error) {
+    console.error(error);
     res.send(error);
   }
 };
