@@ -7,6 +7,7 @@ export const getUserLogin = async (req: Request, res: Response) => {
   try {
     let curUser: any;
     curUser = await UserModel.query().first().where("email", email);
+
     if (curUser === undefined) {
       res.json({
         status: "Bad request",
@@ -14,11 +15,12 @@ export const getUserLogin = async (req: Request, res: Response) => {
       });
     } else {
       const passwordValid = await curUser.verifyPassword(password);
+
       if (passwordValid) {
-        const curUserId = curUser.id;
+        console.log("Usuario actual: ", curUser.id);
         res.json({
           status: "OK",
-          userId: curUserId,
+          userId: curUser.id,
         });
       } else {
         res.json({

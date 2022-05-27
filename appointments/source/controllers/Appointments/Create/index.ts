@@ -3,14 +3,15 @@ import { Request, Response, NextFunction } from "express";
 import { v4 as uuidv4 } from "uuid";
 import db from "../../../db/db";
 import { ENotificationType } from "../../../utils/enums";
+import parse from "date-fns/parse";
 
 export const createController = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  const { idPetitioner, date, idSubject, problemDescription, image } =
-    req.body!;
+  const { idPetitioner, date, idSubject, problemDescription, image } = req.body;
+
   enum EStatusAppointment {
     PENDING = "PENDING",
     ACCEPTED = "ACCEPTED",
@@ -44,7 +45,7 @@ export const createController = async (
         id_appointment: newAppointmentId,
         id_student: idPetitioner,
         id_advisor: null,
-        id_admin: "b4753ce1-0332-4a25-80bb-f6b5962b492f",
+        id_admin: "7746ad47-7664-4043-ab40-5aca0ce6872b",
       });
 
       await axios
@@ -52,7 +53,7 @@ export const createController = async (
           //TODO: Reemplazar por una variable env
           title: "Solicitud de Asesoría",
           description: "Una nueva asesoría se ha solicitado",
-          idUser: "b4753ce1-0332-4a25-80bb-f6b5962b492f", //TODO: Reemplazar con una variable de entorno (O mejor aun, hacer una consulta a la tabla de users, y seleccionar un admin al azar)
+          idUser: "7746ad47-7664-4043-ab40-5aca0ce6872b", //TODO: Reemplazar con una variable de entorno (O mejor aun, hacer una consulta a la tabla de users, y seleccionar un admin al azar)
           type: ENotificationType.NEW_REQUEST,
         })
         .then((res) => console.log("Notification Created"))

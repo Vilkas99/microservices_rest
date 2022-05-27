@@ -8,6 +8,7 @@ const SchedulesModel = require("../../../models/Schedules");
 export const deleteUser = async (req: Request, res: Response) => {
   try {
     const { id } = req.query;
+    console.log("ID que recibi para eliminar: ", id);
     let alreadyExists = await UserModel.query().select("type").where("id", id);
     if (alreadyExists.length !== 0) {
       const deleteCareerQuery = await UserCareerModel.query()
