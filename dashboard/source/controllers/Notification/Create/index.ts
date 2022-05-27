@@ -20,6 +20,7 @@ export const createNotification = async (req: Request, res: Response) => {
   enum ENotificationTyppe {
     "APPOINTMENT_ACCEPTED" = "APPOINTMENT_ACCEPTED",
     "APPOINTMENT_REJECTED" = "APPOINTMENT_REJECTED",
+    "APPOINTMENT_COMPLETED" = "APPOINTMENT_COMPLETED",
     "NEW_REQUEST" = "NEW_REQUEST",
     "MESSAGE" = "MESSAGE",
   }
