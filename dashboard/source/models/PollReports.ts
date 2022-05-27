@@ -1,9 +1,9 @@
 import { Model, RelationMappings, RelationMappingsThunk } from "objection";
 
-class QuestionModel extends Model {
+class PollReportsModel extends Model {
   static get tableName() {
-    return "questions";
+    return "poll-reports";
   }
 }
 
-module.exports = QuestionModel;
+module.exports = PollReportsModel;
