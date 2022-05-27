@@ -6,11 +6,28 @@ AS
 $$
 BEGIN
 
+    WITH DayOfWeekES (dayOfWeek, day) AS
+    ( SELECT dayOfWeek, day 
+        FROM ( VALUES ('Domingo', 0),
+                      ('Lunes', 1),
+                      ('Martes', 2),
+                      ('Miércoles', 3),
+                      ('Jueves', 4),
+                      ('Viernes', 5),
+                      ('Sábado', 6) )
+             AS DayOfWeekES(dayOfWeek, day) )
+
     INSERT INTO "appointment-advisorCandidates"("id_appointment", "id_advisor", "status")
         SELECT NEW.id, id_user, 'PENDING'
         FROM "users-career"
         WHERE id_career IN (SELECT id_career FROM "career-subject" WHERE id_subject = NEW.id_subject)
-        AND get_user_weekly_credited_hours(id_user) < 5;
+        AND get_user_weekly_credited_hours(id_user) < 5
+        AND id_user IN (SELECT advisor
+        					FROM schedules
+        					WHERE NEW.date::time >= start::time AND NEW.date::time <= finish::time
+                            AND day = (SELECT dayOfWeek FROM DayOfWeekES WHERE day = EXTRACT(dow FROM NEW.date))
+        					AND period = (SELECT period FROM current_period))
+        AND semester > (SELECT semester FROM subjects WHERE id = NEW.id_subject);
 
     RETURN NEW;
 
@@ -62,7 +79,11 @@ export async function up(knex: Knex): Promise<void> {
       table.boolean("id").primary().defaultTo(true);
       table.smallint("period").notNullable();
       table.check("??", ["id"], "unique_entry_check");
-      table.check("?? >= 1 && ?? <= 3", ["period"], "valid_period_check");
+      table.check(
+        "?? >= 1 AND ?? <= 3",
+        ["period", "period"],
+        "valid_period_check"
+      );
     })
     .then(function () {
       return knex.raw(GET_USERT_WEEKLY_CREDITED_HOURS);
