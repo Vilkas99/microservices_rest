@@ -270,7 +270,15 @@ export const getPossibleDates = async (req: Request, res: Response) => {
     AND get_user_weekly_credited_hours(id_user) < 5)`,
     [idSubject.toString(), idSubject.toString()]
   ).then((resp) => {
-    console.log(resp.rows);
+    let possibleDates = new Map<number, number>([]);
+
+    resp.rows.forEach((element: any) => {
+      const obj = JSON.parse(JSON.stringify(element));
+      const dateObj = new Date(Date.parse(obj.start));
+      const day = dateObj.getDay();
+      const startHour = dateObj.getUTCHours();
+      if (possibleDates.has(day)) console.log(day, startHour);
+    });
     res.status(200);
     res.json(resp.rows);
   });
