@@ -3,6 +3,7 @@ import db from "../../../db/db";
 
 const AppointmentModel = require("../../../models/Appointment");
 const AppointmentUserModel = require("../../../models/AppointmentUser");
+const UserModel = require("../../../models/User");
 const SubjectsModel = require("../../../models/Subjects");
 
 enum EStatus {
@@ -196,6 +197,46 @@ export const getObjection = async (req: Request, res: Response) => {
 
     res.json(info);
     res.statusCode = 200;
+  } catch (error) {
+    res.send(error);
+  }
+};
+
+export const getPossibleDates = async (req: Request, res: Response) => {
+  const { idSubject } = req.query;
+  if (idSubject === undefined) {
+    res.status(400);
+    throw "Query info was not provided";
+  }
+  db.raw(
+    `SELECT day, start, finish FROM schedules WHERE advisor IN (
+    SELECT id_user
+    FROM "career-subject" JOIN "users-career" USING(id_career)
+    WHERE id_subject = ?
+    AND semester > (SELECT semester FROM subjects WHERE id = ?)
+    AND get_user_weekly_credited_hours(id_user) < 5)`,
+    [idSubject.toString(), idSubject.toString()]
+  ).then((resp) => {
+    console.log(resp.rows);
+    res.status(200);
+    res.json(resp.rows);
+  });
+  /*await db("schedules")
+    .select("day", "start", "finish")
+    .whereIn("advisor", function () {
+      this.select("id_user").fromRaw()*/
+  /*
+        `
+        FROM "career-subject" JOIN "users-career" USING(id_career)
+        WHERE id_subject = ??
+        AND semester > (SELECT semester FROM subjects WHERE id = ??)
+        AND get_user_weekly_credited_hours(id_user) < 5)`,
+        [idSubject.toString(), idSubject.toString()]
+        
+    });*/
+  //res.status(200);
+  //res.json(info);
+  try {
   } catch (error) {
     res.send(error);
   }

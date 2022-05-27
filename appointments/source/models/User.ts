@@ -62,15 +62,11 @@ class UserModel extends Model {
         },
       },
       schedules: {
-        relation: Model.ManyToManyRelation,
+        relation: Model.HasManyRelation,
         modelClass: Schedules,
         join: {
           from: "users.id",
-          through: {
-            from: "users-schedule.id_user",
-            to: "users-schedule.id_schedule",
-          },
-          to: "schedules.id",
+          to: "schedules.advisor",
         },
       },
     };

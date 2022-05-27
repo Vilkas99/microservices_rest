@@ -5,26 +5,15 @@ class SchedulesModel extends Model {
     return "schedules";
   }
 
-  //TODO: Cambiar todo este método.
   static get relationMappings(): RelationMappings | RelationMappingsThunk {
-    const Consultant = require("./Consultant");
-    const Debt = require("./Debt");
-
+    const User = require("./User");
     return {
-      consultants: {
-        relation: Model.HasManyRelation,
-        modelClass: Consultant,
+      users: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: User,
         join: {
-          from: "administrators.id",
-          to: "consultants.id_admin",
-        },
-      },
-      debts: {
-        relation: Model.HasManyRelation,
-        modelClass: Debt,
-        join: {
-          from: "administrators.id",
-          to: "debts.id_admin",
+          from: "schedules.advisor",
+          to: "users.id",
         },
       },
     };

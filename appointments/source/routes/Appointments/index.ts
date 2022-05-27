@@ -4,6 +4,7 @@ import {
   getAdmin,
   getStatus,
   getAll,
+  getPossibleDates,
 } from "../../controllers/Appointments/Get";
 import { updateDetailsController } from "../../controllers/Appointments-User/Update";
 
@@ -16,5 +17,6 @@ router.patch("/details", updateDetailsController);
 router.get("/admin", getAdmin);
 router.get("/status", getStatus);
 router.get("/allAppointments", getAll);
+router.get("/possibleDates", getPossibleDates);
 
 module.exports = router;
