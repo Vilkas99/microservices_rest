@@ -1,19 +1,12 @@
 import { Request, Response } from "express";
-import db from "../../../db/db";
 
-enum EQuestionType {
-  text = "text",
-  scale = "scale",
-  yesOrNo = "yesOrNo",
-}
+const QuestionModel = require("../../../models/Question");
 
 // Endpoint que obtiene las preguntas en orden de una encuesta dado un tipo de encuesta
-
 export const getQuestionController = async (req: Request, res: Response) => {
   enum EUserType {
     advisor = "advisor",
     student = "student",
-    admin = "admin",
   }
 
   const { id_type } = req.query;
@@ -28,7 +21,7 @@ export const getQuestionController = async (req: Request, res: Response) => {
   }
 
   try {
-    const questionsPoll: any = await db
+    const questionsPoll: any = await QuestionModel.query()
       .select("title as question", "type")
       .from("questions")
       .where("survey_type", id_type?.toString())
