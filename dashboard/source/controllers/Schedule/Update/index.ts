@@ -20,34 +20,26 @@ interface ISchedulesUpdateReq {
 }
 
 interface IScheduelArrayUpdate {
-  schedules: Array<ISchedulesUpdateReq>;
+  scheduleOne: Array<ISchedulesUpdateReq>;
+  scheduleTwo: Array<ISchedulesUpdateReq>;
+  scheduleThree: Array<ISchedulesUpdateReq>;
   idAdvisor: string;
-  period: string;
 }
 
-export const updateSchedule = async (req: Request, res: Response) => {
-  const { schedules, idAdvisor, period } = req.body as IScheduelArrayUpdate;
-
-  const days = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"];
-
-  const error = false;
-
-  await ScheduleModel.query().delete().where({
-    advisor: idAdvisor,
-  });
-
+const updateSchedulesDatabase = async (
+  schedules: Array<ISchedulesUpdateReq>,
+  res: Response,
+  idAdvisor: string,
+  period: string
+) => {
   await schedules.forEach(async (schedule) => {
+    const days = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"];
     const id = uuid();
 
     const newStart = new Date(Date.parse(schedule.start));
     const newEnd = new Date(Date.parse(schedule.end));
 
     const day = days[getDay(newStart) - 1];
-
-    console.log("Inicio: ", newStart);
-    console.log("Final: ", newEnd);
-    console.log("Final chafon: ", schedule.end);
-    console.log("-----------------");
 
     try {
       await ScheduleModel.query().insert({
@@ -59,11 +51,25 @@ export const updateSchedule = async (req: Request, res: Response) => {
         day,
       });
     } catch (error) {
-      console.log("MAMORGAN");
       res.send(error);
       res.status(400);
       console.error(error);
       error = true;
     }
   });
+};
+
+export const updateSchedule = async (req: Request, res: Response) => {
+  const { scheduleOne, scheduleTwo, scheduleThree, idAdvisor } =
+    req.body as IScheduelArrayUpdate;
+
+  await ScheduleModel.query().delete().where({
+    advisor: idAdvisor,
+  });
+
+  await updateSchedulesDatabase(scheduleOne, res, idAdvisor, "0");
+  await updateSchedulesDatabase(scheduleTwo, res, idAdvisor, "1");
+  await updateSchedulesDatabase(scheduleThree, res, idAdvisor, "2");
+
+  res.status(200).send("Ok");
 };

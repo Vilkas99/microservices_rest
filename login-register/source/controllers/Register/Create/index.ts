@@ -47,14 +47,13 @@ export const createUser = async (req: Request, res: Response) => {
     semesterDD,
     status,
     type,
-    schedules,
-  }: INewUserData = req.body;
+  } = req.body;
   try {
     let newUserId = uuid();
     let alreadyExists = await UserModel.query()
       .select("email")
       .where("email", email);
-    console.log(alreadyExists);
+
     if (alreadyExists.length === 0) {
       await UserModel.query().insert({
         id: newUserId,
@@ -63,45 +62,24 @@ export const createUser = async (req: Request, res: Response) => {
         password: password,
         status: status,
         type: type,
-        created_at: new Date(),
-        updated_at: new Date(),
       });
 
       //Insert user data in careers table if type is advisor or student
       if (EType.student === type || EType.advisor === type) {
+        const entryCareerUserId = uuid();
         await UserCareerModel.query().insert({
-          id: uuid(),
+          id: entryCareerUserId,
           id_user: newUserId,
           id_career: career,
           semester: semester,
-          created_at: new Date(),
-          updated_at: new Date(),
         });
         if (careerDD != undefined) {
+          const entrySecondCareerUserId = uuid();
           await UserCareerModel.query().insert({
-            id: uuid(),
+            id: entrySecondCareerUserId,
             id_user: newUserId,
             id_career: careerDD,
             semester: semesterDD,
-            created_at: new Date(),
-            updated_at: new Date(),
-          });
-        }
-      }
-      //Create user schedules if type is advisor
-      if (EType.advisor === type && schedules != undefined) {
-        for (let i = 0; i < schedules.length; i++) {
-          let newScheduleId = uuid();
-          await SchedulesModel.query().insert({
-            id: newScheduleId,
-            start: schedules[i].start,
-            finish: schedules[i].finish,
-            period: schedules[i].period,
-          });
-          await UserScheduleModel.query().insert({
-            id: uuid(),
-            id_user: newUserId,
-            id_schedule: newScheduleId,
           });
         }
       }
@@ -116,7 +94,7 @@ export const createUser = async (req: Request, res: Response) => {
       });
     }
   } catch (error) {
-    console.log("ERROR AL CREAR USUARIO");
+    console.log("ERROR AL CREAR USUARIO: ", error);
     res.send(error);
   }
 };

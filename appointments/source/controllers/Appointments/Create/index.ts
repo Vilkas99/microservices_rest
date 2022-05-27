@@ -11,7 +11,6 @@ export const createController = async (
 ) => {
   const { idPetitioner, date, idSubject, problemDescription, image } =
     req.body!;
-
   enum EStatusAppointment {
     PENDING = "PENDING",
     ACCEPTED = "ACCEPTED",
@@ -23,6 +22,12 @@ export const createController = async (
   try {
     // TODO: IMPORTANTE Sanitizar las entradas, especialemente la de problem_description
     let errorInAppointmentsUser;
+    let errorMessage;
+    const dateObject = new Date(Date.parse(date));
+    if (dateObject.getDay() == 0 || dateObject.getDay() == 6) {
+      res.status(400);
+      throw "Cannot schedule an appointment on weekends";
+    }
     await db("appointments").insert({
       id: newAppointmentId,
       date: new Date(Date.parse(date)),
@@ -57,11 +62,11 @@ export const createController = async (
       console.error(error);
     }
     if (errorInAppointmentsUser) {
+      res.status(500);
       throw errorInAppointmentsUser;
     }
     res.status(200).json({ newAppointmentId: newAppointmentId });
   } catch (error) {
-    res.status(500);
     res.send(error);
     console.error(error);
   }

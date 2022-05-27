@@ -4,6 +4,7 @@ import {
   getAdmin,
   getStatus,
   getAll,
+  getPossibleDates,
 } from "../../controllers/Appointments/Get";
 
 const express = require("express");
@@ -14,5 +15,6 @@ router.patch("/", updateController);
 router.get("/admin", getAdmin);
 router.get("/status", getStatus);
 router.get("/allAppointments", getAll);
+router.get("/possibleDates", getPossibleDates);
 
 module.exports = router;
