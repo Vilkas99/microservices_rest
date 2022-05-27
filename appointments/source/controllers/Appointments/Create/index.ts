@@ -45,7 +45,7 @@ export const createController = async (
         id_appointment: newAppointmentId,
         id_student: idPetitioner,
         id_advisor: null,
-        id_admin: "7746ad47-7664-4043-ab40-5aca0ce6872b",
+        id_admin: "15bc1e73-20ad-43df-929b-4044da97e4e3",
       });
 
       await axios
@@ -53,7 +53,7 @@ export const createController = async (
           //TODO: Reemplazar por una variable env
           title: "Solicitud de Asesoría",
           description: "Una nueva asesoría se ha solicitado",
-          idUser: "7746ad47-7664-4043-ab40-5aca0ce6872b", //TODO: Reemplazar con una variable de entorno (O mejor aun, hacer una consulta a la tabla de users, y seleccionar un admin al azar)
+          idUser: "15bc1e73-20ad-43df-929b-4044da97e4e3", //TODO: Reemplazar con una variable de entorno (O mejor aun, hacer una consulta a la tabla de users, y seleccionar un admin al azar)
           type: ENotificationType.NEW_REQUEST,
         })
         .then((res) => console.log("Notification Created"))
