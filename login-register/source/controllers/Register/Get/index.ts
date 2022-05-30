@@ -6,6 +6,8 @@ const UserModel = require("../../../models/User");
 export const getUserData = async (req: Request, res: Response) => {
   const { id } = req.query;
 
+  console.log("Recibiendo ID: ", id);
+
   try {
     let userType: any;
     userType = await UserModel.query().select("type").where("id", id);
