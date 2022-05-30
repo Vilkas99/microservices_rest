@@ -1,3 +1,4 @@
+import { parseISO } from "date-fns";
 import { Request, Response } from "express";
 import db from "../../../db/db";
 
@@ -270,15 +271,23 @@ export const getPossibleDates = async (req: Request, res: Response) => {
     AND get_user_weekly_credited_hours(id_user) < 5)`,
     [idSubject.toString(), idSubject.toString()]
   ).then((resp) => {
-    let possibleDates = new Map<number, number>([]);
+    var possibleDates = new Array();
+    let x = 0;
+    const len = resp.rows.length;
 
-    resp.rows.forEach((element: any) => {
-      const obj = JSON.parse(JSON.stringify(element));
-      const dateObj = new Date(Date.parse(obj.start));
-      const day = dateObj.getDay();
-      const startHour = dateObj.getUTCHours();
-      if (possibleDates.has(day)) console.log(day, startHour);
-    });
+    for (let i = 0; i < len; i++) {
+      const dateObject = new Date(Date.parse(resp.rows[x].start));
+      const day = resp.rows[x].day;
+      const hours = dateObject.getUTCHours();
+      const element = day.concat(hours);
+      if (possibleDates.includes(element)) {
+        resp.rows.splice(x, 1);
+      } else {
+        x = x + 1;
+        possibleDates.push(element);
+      }
+    }
+
     res.status(200);
     res.json(resp.rows);
   });
