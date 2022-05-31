@@ -33,6 +33,7 @@ const updateSchedulesDatabase = async (
   period: string
 ) => {
   await schedules.forEach(async (schedule) => {
+    console.log("Actualizando horarios...");
     const days = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"];
     const id = uuid();
 
