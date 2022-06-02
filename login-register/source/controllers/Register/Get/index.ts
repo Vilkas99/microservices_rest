@@ -9,25 +9,32 @@ export const getUserData = async (req: Request, res: Response) => {
   console.log("Recibiendo ID: ", id);
 
   try {
-    let userType: any;
-    userType = await UserModel.query().select("type").where("id", id);
-    let userData: any;
-    if (userType[0].type === "advisor") {
-      userData = await UserModel.query()
-        .findById(id)
-        .withGraphFetched("career")
-        .withGraphFetched("schedules");
-    } else if (userType[0].type === "student") {
-      userData = await UserModel.query()
-        .findById(id)
-        .withGraphFetched("career");
+    if (id !== undefined) {
+      let userType: any;
+      userType = await UserModel.query().select("type").where("id", id);
+      let userData: any;
+      if (userType[0].type === "advisor") {
+        userData = await UserModel.query()
+          .findById(id)
+          .withGraphFetched("career")
+          .withGraphFetched("schedules");
+      } else if (userType[0].type === "student") {
+        userData = await UserModel.query()
+          .findById(id)
+          .withGraphFetched("career");
+      } else {
+        userData = await UserModel.query().findById(id);
+      }
+      res.json({
+        status: "OK",
+        user: userData,
+      });
     } else {
-      userData = await UserModel.query().findById(id);
+      res.json({
+        status: "Bad request",
+        msg: "User id not given",
+      });
     }
-    res.json({
-      status: "OK",
-      user: userData,
-    });
   } catch (error) {
     console.log(error);
     res.send(error);
