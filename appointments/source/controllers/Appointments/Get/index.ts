@@ -345,7 +345,7 @@ export const getPossibleDates = async (req: Request, res: Response) => {
               self.findIndex((d) => d.getTime() === date.getTime()) === i &&
               !nonAvilableSchedules.has(date.getTime())
           );
-          res.status(200).send("test");
+          res.status(200).send(schedules);
         });
     })
     .catch((error) => {
