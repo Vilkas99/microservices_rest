@@ -22,6 +22,61 @@ export const getSubjectCareerController = async (
   req: Request,
   res: Response
 ) => {
+  const { idCarrera, page, limitItems } = req.query;
+  if (!isString(idCarrera))
+    res.status(400).send("Error: idCarrera is not a string");
+  else if (idCarrera === "") {
+    res.status(400).send("Error: idCarrera was not provided by client");
+    return;
+  }
+
+  if (!isUUID(idCarrera)) {
+    res.status(400).send("idCarrera is not a valid UUID.");
+    return;
+  }
+
+  let off = 0;
+  let p = 0;
+  if (page && limitItems) {
+    p = +page;
+    if (p < 1) {
+      res.status(404).send("Error: Index page incorrect.");
+      return;
+    } else {
+      off = (+page - 1) * +limitItems;
+    }
+  }
+
+  try {
+    const subjectCareer: any = await SubjectModel.query()
+      .select(
+        "subjects.id",
+        "subjects.acronym",
+        "subjects.name",
+        "career-subject.semester"
+      )
+      .from("career-subject")
+      .innerJoin("subjects", "career-subject.id_subject", "subjects.id")
+      .where("career-subject.id_career", idCarrera)
+      .limit(limitItems)
+      .offset(off);
+
+    if (subjectCareer === undefined || subjectCareer.length === 0) {
+      res.status(404).send("Error: Subjects not found.");
+      return;
+    }
+
+    res.json(subjectCareer);
+    res.statusCode = 200;
+  } catch (error) {
+    res.status(500).send(error);
+  }
+};
+
+export const getSubjectCareerSemesterController = async (
+  req: Request,
+  res: Response
+) => {
   const { idCarrera, semester } = req.query;
 
   if (!isString(idCarrera))
@@ -91,33 +146,55 @@ export const getAllSubjectsController = async (req: Request, res: Response) => {
   }
 
   try {
-    const numberQueries: any = await SubjectModel.query()
+    const numberSubjects: any = await SubjectModel.query()
       .count("id")
       .from("subjects");
 
-    console.log(numberQueries);
-
     const subjects: any = await db.raw(
-      `SELECT subjects.acronym as subjectAcronym`
+      `SELECT materias.acronym as subjectAcronym,
+      materias.id,
+      materias.name,
+      careers.acronym as careerAcronym,
+      "career-subject".semester FROM (SELECT * FROM subjects LIMIT ${limitItems} OFFSET ${off}) AS materias
+      INNER JOIN "career-subject" ON "career-subject".id_subject = materias.id
+      INNER JOIN careers ON "career-subject".id_career = careers.id`
     );
-    // .select(
-    //   "subjects.acronym as subjectAcronym",
-    //   "subjects.name",
-    //   "careers.acronym as careerAcronym",
-    //   "subjects.semester"
-    // )
-    // .from("subjects")
-    // // .limit(limitItems)
-    // // .offset(off)
-    // .innerJoin("career-subject", "career-subject.id_subject", "subjects.id")
-    // .innerJoin("careers", "career-subject.id_career", "careers.id");
 
-    if (subjects === undefined || subjects.length === 0) {
+    if (
+      subjects === undefined ||
+      subjects.length === 0 ||
+      subjects.rows === undefined ||
+      subjects.rows.length === 0
+    ) {
       res.status(404).send("Error: Subjects not found.");
       return;
     }
 
-    res.json(subjects);
+    let materias: any = [];
+    subjects.rows.forEach((element: any) => {
+      const elementInMaterias = materias.findIndex(
+        (materia: any) => element.id === materia.id
+      );
+      if (elementInMaterias != -1) {
+        materias[elementInMaterias].careeracronym.push(element.careeracronym);
+        const semesterInMateria: any = materias[
+          elementInMaterias
+        ].semester.includes(element.semester);
+        if (!semesterInMateria) {
+          materias[elementInMaterias].semester.push(element.semester);
+        }
+      } else {
+        materias.push({
+          id: element.id,
+          subjectacronym: element.subjectacronym,
+          name: element.name,
+          careeracronym: [element.careeracronym],
+          semester: [element.semester],
+        });
+      }
+    });
+
+    res.json({ materias: materias, count: +numberSubjects[0].count });
     res.statusCode = 200;
   } catch (error) {
     res.status(500).send(error);
