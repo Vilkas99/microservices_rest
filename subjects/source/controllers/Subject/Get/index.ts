@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import db from "../../../db/db";
 
 const SubjectModel = require("../../../models/Subjects");
 const SubjectCareerModel = require("../../../models/SubjectCareer");
@@ -57,11 +58,16 @@ export const getSubjectCareerController = async (
       .from("career-subject")
       .innerJoin("subjects", "career-subject.id_subject", "subjects.id")
       .where("career-subject.id_career", idCarrera)
-      .andWhere("subjects.semester", "<=", semester)
+      .andWhere("career-subject.semester", "<=", semester)
       .orWhere(
         "career-subject.id_career",
         "b2a9a7c6-cc4f-4507-b70f-6bdb7488e748"
       );
+
+    if (careerSubject === undefined || careerSubject.length === 0) {
+      res.status(404).send("Error: Subjects not found.");
+      return;
+    }
 
     res.json(careerSubject);
     res.statusCode = 200;
@@ -73,23 +79,43 @@ export const getSubjectCareerController = async (
 export const getAllSubjectsController = async (req: Request, res: Response) => {
   const { page, limitItems } = req.query;
   let off = 0;
+  let p = 0;
   if (page && limitItems) {
-    off = (+page - 1) * +limitItems;
+    p = +page;
+    if (p < 1) {
+      res.status(404).send("Error: Index page incorrect.");
+      return;
+    } else {
+      off = (+page - 1) * +limitItems;
+    }
   }
 
   try {
-    const subjects: any = await SubjectModel.query()
-      .select(
-        "subjects.acronym as subjectAcronym",
-        "subjects.name",
-        "careers.acronym as careerAcronym",
-        "subjects.semester"
-      )
-      .from("career-subject")
-      .innerJoin("subjects", "career-subject.id_subject", "subjects.id")
-      .innerJoin("careers", "career-subject.id_career", "careers.id")
-      .limit(limitItems)
-      .offset(off);
+    const numberQueries: any = await SubjectModel.query()
+      .count("id")
+      .from("subjects");
+
+    console.log(numberQueries);
+
+    const subjects: any = await db.raw(
+      `SELECT subjects.acronym as subjectAcronym`
+    );
+    // .select(
+    //   "subjects.acronym as subjectAcronym",
+    //   "subjects.name",
+    //   "careers.acronym as careerAcronym",
+    //   "subjects.semester"
+    // )
+    // .from("subjects")
+    // // .limit(limitItems)
+    // // .offset(off)
+    // .innerJoin("career-subject", "career-subject.id_subject", "subjects.id")
+    // .innerJoin("careers", "career-subject.id_career", "careers.id");
+
+    if (subjects === undefined || subjects.length === 0) {
+      res.status(404).send("Error: Subjects not found.");
+      return;
+    }
 
     res.json(subjects);
     res.statusCode = 200;
