@@ -1,3 +1,4 @@
+import { eachHourOfInterval } from "date-fns";
 import { Request, Response, NextFunction } from "express";
 import db from "../../../db/db";
 import { ENotificationType } from "../../../utils/enums";
@@ -29,6 +30,12 @@ interface IUpdateaAppointment {
   idStudent: string;
   baseChanges: IBaseChanges;
   detailChanges: IIdsAppointmentDataMod;
+}
+
+interface IUpdateaCandidate {
+  id_appointment: string;
+  id_user: string;
+  newState: EStatus;
 }
 
 const notificationForStudent = (
@@ -70,6 +77,25 @@ const notificationForUsers = (detailsChanges: IIdsAppointmentDataMod) => {
       );
     }
   }
+};
+
+export const updateCandidate = async (req: Request, res: Response) => {
+  const { id_appointment, id_user, newState }: IUpdateaCandidate = req.body;
+
+  try {
+    await db("appointments-advisorCandidates")
+      .where({
+        id_appointment: id_appointment,
+        id_advisor: id_user,
+      })
+      .update("status", "ACTIVE");
+  } catch (error) {
+    res.send(error);
+    console.error(error);
+    return;
+  }
+
+  res.sendStatus(200);
 };
 
 export const updateController = async (req: Request, res: Response) => {
