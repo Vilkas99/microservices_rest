@@ -285,7 +285,10 @@ export const getPossibleDates = async (req: Request, res: Response) => {
     SELECT id_user
     FROM "career-subject" JOIN "users-career" USING(id_career)
     WHERE id_subject = ?
-    AND semester > (SELECT semester FROM subjects WHERE id = ?)
+    AND "users-career".semester > (SELECT semester
+                                   FROM "career-subject"
+                                   WHERE id_subject = ?
+                                   AND "career-subject".id_career = "users-career".id_career)
     AND get_user_weekly_credited_hours(id_user) < 5)
     `,
     [idSubject.toString(), idSubject.toString()]
@@ -294,7 +297,6 @@ export const getPossibleDates = async (req: Request, res: Response) => {
       // resp.rows tiene los horarios de quienes pueden darla, pero no se ha filtrado los que ya están ocupados
 
       let schedules: Date[] = [];
-      const timestamp = new Date();
       for (const schedule of resp.rows) {
         const dayOfWeek = ["Do", "Lu", "Ma", "Mi", "Ju", "Vi", "Sá"].indexOf(
           schedule["day"].slice(0, 2)
@@ -303,23 +305,23 @@ export const getPossibleDates = async (req: Request, res: Response) => {
         const datesToCheck = getDatesOfNextWeeksDays(dayOfWeek, 1);
 
         // este paso es muy necesario porque, por el momento, no sabemos si el server va a estar en hora de cdmx
-        const startMXDate = new Date(
-          schedule["start"].toLocaleString("en-US", {
-            timeZone: "America/Mexico_City",
-          })
-        );
-        const finishMXDate = new Date(
-          schedule["finish"].toLocaleString("en-US", {
-            timeZone: "America/Mexico_City",
-          })
-        );
+        const startMXDate = new Date(schedule["start"]);
+        const finishMXDate = new Date(schedule["finish"]);
 
-        let howManyHours = finishMXDate.getHours() - startMXDate.getHours();
-        for (let i = 0; i < howManyHours; i++) {
+        let howManyHours =
+          finishMXDate.getUTCHours() - startMXDate.getUTCHours();
+        if (howManyHours < 0) {
+          howManyHours = 24 + howManyHours;
+        }
+
+        for (let i = 0; i <= howManyHours; i++) {
           for (const dateToCheck of datesToCheck) {
-            timestamp.setTime(schedule["start"].getTime() + i * 60 * 60 * 1000);
-            timestamp.setMonth(dateToCheck.getMonth());
-            timestamp.setDate(dateToCheck.getDate());
+            const timestamp = new Date(new Date().toUTCString().slice(0, 25));
+            timestamp.setUTCMonth(
+              dateToCheck.getUTCMonth(),
+              dateToCheck.getUTCDate()
+            );
+            timestamp.setUTCHours(startMXDate.getUTCHours() + i, 0, 0, 0);
             schedules.push(new Date(timestamp));
           }
         }
@@ -345,10 +347,23 @@ export const getPossibleDates = async (req: Request, res: Response) => {
               self.findIndex((d) => d.getTime() === date.getTime()) === i &&
               !nonAvilableSchedules.has(date.getTime())
           );
-          res.status(200).send(schedules);
+
+          let response: { day: string; hour: string }[] = [];
+          for (const schedule of schedules) {
+            const s = schedule.toLocaleString("es-MX", {
+              weekday: "long",
+              timeZone: "America/Mexico_City",
+            });
+            response.push({
+              day: `${s[0].toUpperCase()}${s.slice(1)}`,
+              hour: schedule.toUTCString(),
+            });
+          }
+          res.status(200).send(response);
         });
     })
     .catch((error) => {
+      console.log(error);
       res.send(error);
     });
 };
