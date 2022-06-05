@@ -1,4 +1,5 @@
-import { Knex } from "knex";
+import Knex = require("knex");
+
 const ADD_APPOINTMENT_CANDIDATES = `CREATE OR REPLACE FUNCTION add_appointment_candidates()
 RETURNS trigger
 AS
@@ -26,7 +27,7 @@ BEGIN
         					WHERE NEW.date::time >= start::time AND NEW.date::time <= finish::time
                             AND day = (SELECT dayOfWeek FROM DayOfWeekES WHERE day = EXTRACT(dow FROM NEW.date))
         					AND period = (SELECT period FROM current_period))
-        AND semester > ANY (SELECT semester FROM "career-subject" WHERE id_subject = NEW.id_subject);
+        AND semester > (SELECT semester FROM subjects WHERE id = NEW.id_subject);
 
     RETURN NEW;
 
