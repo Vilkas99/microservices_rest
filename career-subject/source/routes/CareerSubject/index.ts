@@ -1,12 +1,14 @@
-import { getSubjectCareerController } from "../../controllers/CareerSubject/Get";
+import { getCareerSubjectsController } from "../../controllers/CareerSubject/Get";
 import { createCareerSubjectController } from "../../controllers/CareerSubject/Create";
-import { updateSubjectController } from "../../controllers/CareerSubject/Update";
+import { updateCareerSubjectController } from "../../controllers/CareerSubject/Update";
+import { deleteCareerSubjectController } from "../../controllers/CareerSubject/Delete";
 
 const express = require("express");
 const router = express.Router();
 
-router.get("/", getSubjectCareerController);
+router.get("/", getCareerSubjectsController);
 router.post("/", createCareerSubjectController);
-router.patch("/", updateSubjectController);
+router.patch("/", updateCareerSubjectController);
+router.delete("/", deleteCareerSubjectController);
 
 module.exports = router;
