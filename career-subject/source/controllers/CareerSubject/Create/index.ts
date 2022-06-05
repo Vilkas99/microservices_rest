@@ -76,13 +76,24 @@ export const createCareerSubjectController = async (
       return;
     }
 
-    const careertExists = await SubjectModel.query()
+    const careerExists = await SubjectModel.query()
       .select()
       .from("careers")
       .where("id", idCareer);
 
-    if (careertExists === undefined && careertExists.length === 0) {
+    if (careerExists === undefined && careerExists.length === 0) {
       res.status(400).send("Error: the career does not exist");
+      return;
+    }
+
+    const careerSubjectExists = await SubjectModel.query()
+      .select()
+      .from("career-subject")
+      .where("id_career", idCareer)
+      .andWhere("id_subject", idSubject);
+
+    if (careerSubjectExists !== undefined && careerSubjectExists.length !== 0) {
+      res.status(400).send("Error: the relation career-subject already exists");
       return;
     }
 
