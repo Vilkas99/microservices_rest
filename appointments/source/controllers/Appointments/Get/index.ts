@@ -1,5 +1,6 @@
 import { parseISO } from "date-fns";
 import { Request, Response } from "express";
+import { email } from "../../../email/index";
 import db from "../../../db/db";
 
 const AppointmentModel = require("../../../models/Appointment");
@@ -36,8 +37,17 @@ interface IIdsAppointmentDataMod {
   id_admin?: string;
 }
 
-// ---------------------- PRIMERA -------------------------------------------
-// Endpoint que obtiene la asesoría más reciente de un admin
+/*
+-------------EJEMPLO DE COMO USAR LA FUNCION DE EMAIL------------------------
+*/
+
+export const email2 = async (req: Request, res: Response) => {
+  email(
+    "a01733922@tec.mx",
+    "Pruebita",
+    "<h1>PAE</h1><h2>Recuperar contraseña</h2>"
+  );
+};
 
 export const getAdmin = async (req: Request, res: Response) => {
   const { id, id_type } = req.query;
@@ -79,15 +89,29 @@ export const getAdmin = async (req: Request, res: Response) => {
       .where(value, id as string)
       .orderBy("appointments.created_at", "desc");
     res.json(adminFirstAppointment);
-
     res.statusCode = 200;
   } catch (error) {
     res.send(error);
   }
 };
 
-// ---------------------- SEGUNDA -------------------------------------------
-// Endpoint que obtiene la asesoría activa más reciente de un admin
+export const getCandidates = async (req: Request, res: Response) => {
+  const { id_appointment } = req.query;
+
+  try {
+    const adminFirstAppointment: any = await db
+      .select("appointments-advisorCandidates.*")
+      .from("appointments-advisorCandidates")
+      .where({
+        "appointments-advisorCandidates.status": "ACTIVE",
+        "appointments-advisorCandidates.id_appointment": id_appointment,
+      });
+    res.json(adminFirstAppointment);
+    res.statusCode = 200;
+  } catch (error) {
+    res.send(error);
+  }
+};
 
 export const getStatus = async (req: Request, res: Response) => {
   const id = req.query["id"];
@@ -123,9 +147,6 @@ export const getStatus = async (req: Request, res: Response) => {
     res.send(error);
   }
 };
-
-// ---------------------- TERCERA -------------------------------------------
-// Todas las asesorías dependiendo del tipo de usuario
 
 const getSubject = async (id: string) => {
   const mySubject = await SubjectsModel.query().findById(id).select("name");
