@@ -152,8 +152,8 @@ export const getAllSubjectsController = async (req: Request, res: Response) => {
       materias.name,
       careers.acronym as careerAcronym,
       "career-subject".semester FROM (SELECT * FROM subjects LIMIT ${limitItems} OFFSET ${off}) AS materias
-      INNER JOIN "career-subject" ON "career-subject".id_subject = materias.id
-      INNER JOIN careers ON "career-subject".id_career = careers.id`
+      FULL JOIN "career-subject" ON "career-subject".id_subject = materias.id
+      FULL JOIN careers ON "career-subject".id_career = careers.id WHERE materias.id IS NOT NULL`
     );
 
     if (
@@ -184,13 +184,13 @@ export const getAllSubjectsController = async (req: Request, res: Response) => {
           id: element.id,
           subjectacronym: element.subjectacronym,
           name: element.name,
-          careeracronym: [element.careeracronym],
-          semester: [element.semester],
+          careeracronym: element.careeracronym ? [element.careeracronym] : [],
+          semester: element.semester ? [element.semester] : [],
         });
       }
     });
 
-    res.json({ materias: materias, count: +numberSubjects[0].count });
+    res.json({ subjects: materias, count: +numberSubjects[0].count });
     res.statusCode = 200;
   } catch (error) {
     res.status(500).send(error);
