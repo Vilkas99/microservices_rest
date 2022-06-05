@@ -37,6 +37,7 @@ export const getSubjectCareerController = async (
 
   let off = 0;
   let p = 0;
+
   if (page && limitItems) {
     p = +page;
     if (p < 1) {
@@ -45,6 +46,9 @@ export const getSubjectCareerController = async (
     } else {
       off = (+page - 1) * +limitItems;
     }
+  } else {
+    res.status(404).send("Error: page and limitItems should not be 0.");
+    return;
   }
 
   try {
