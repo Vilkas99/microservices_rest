@@ -113,11 +113,7 @@ export const getSubjectCareerSemesterController = async (
       .from("career-subject")
       .innerJoin("subjects", "career-subject.id_subject", "subjects.id")
       .where("career-subject.id_career", idCarrera)
-      .andWhere("career-subject.semester", "<=", semester)
-      .orWhere(
-        "career-subject.id_career",
-        "b2a9a7c6-cc4f-4507-b70f-6bdb7488e748"
-      );
+      .andWhere("career-subject.semester", "=", semester);
 
     if (careerSubject === undefined || careerSubject.length === 0) {
       res.status(404).send("Error: Subjects not found.");
