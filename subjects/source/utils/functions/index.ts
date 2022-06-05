@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import db from "../../db/db";
 import redisClient from "../../redis";
 
 const {
@@ -133,4 +134,39 @@ export const createEntryRedis = (key: string, value: string) => {
     if (err) throw err;
     console.log(reply);
   });
+};
+
+export const isString = (x: any) => {
+  return Object.prototype.toString.call(x) === "[object String]";
+};
+
+export const isNumber = (n: any) => {
+  return !isNaN(parseFloat(n)) && !isNaN(n - 0);
+};
+
+export const isBoolean = (n: any) => {
+  return n === true || n === false || toString.call(n) === "[object Boolean]";
+};
+
+export const isUUID = (uuid: any) => {
+  return uuid.match(
+    "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+  );
+};
+
+export const isUserAdmin = async (uuid: any) => {
+  try {
+    const idAdminObject: any = await db
+      .select("id")
+      .from("users")
+      .where("id", uuid)
+      .andWhere("type", "admin");
+
+    if (idAdminObject === undefined || idAdminObject.length === 0) {
+      return false;
+    }
+    return true;
+  } catch (e) {
+    return false;
+  }
 };

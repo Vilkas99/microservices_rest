@@ -7,7 +7,7 @@ class SubjectsModel extends Model {
 
   //TODO: Cambiar todo este método.
   static get relationMappings(): RelationMappings | RelationMappingsThunk {
-    const Appointment = require("./Appointments");
+    const Appointment = require("./Appointment");
 
     return {
       consultants: {
