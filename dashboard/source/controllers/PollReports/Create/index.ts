@@ -18,7 +18,8 @@ const createPollReportWebSocket = async (idUser: string, body: any) => {
   }
 };
 
-// Endpoint que obtiene las preguntas en orden de una encuesta dado un tipo de encuesta
+// Endpoint que crea un reporte de respuestas de encuesta para una asesoría, para el asesor o asesorado
+
 export const createPollReportController = async (
   req: Request,
   res: Response
@@ -28,12 +29,21 @@ export const createPollReportController = async (
     student = "student",
   }
 
-  const { answer, question, idAppointment, surveyType } = req.body;
+  const { answers, idAppointment, surveyType } = req.body;
 
-  if (paramNotPresent(answer, res, "answer")) return;
-  if (paramNotPresent(question, res, "question")) return;
-  if (paramNotPresent(idAppointment, res, "id_appointment")) return;
-  if (paramNotPresent(surveyType, res, "survey_type")) return;
+  if (
+    (answers &&
+      Object.keys(answers).length === 0 &&
+      Object.getPrototypeOf(answers) === Object.prototype) ||
+    answers === undefined ||
+    answers === null
+  ) {
+    res.status(400).send("Error: No answers/questions were provided");
+    return;
+  }
+
+  if (paramNotPresent(idAppointment, res, "idAppointment")) return;
+  if (paramNotPresent(surveyType, res, "surveyType")) return;
   if (!Object.values(ESurveyType).includes(surveyType as ESurveyType)) {
     res
       .status(400)
@@ -65,8 +75,6 @@ export const createPollReportController = async (
     const pollReportObject: any = await PollReportsModel.query()
       .select("id")
       .from("poll-reports")
-      .where("answer", answer)
-      .where("question", question)
       .where("id_appointment", idAppointment)
       .where("survey_type", surveyType);
     if (pollReportObject.length !== 0) {
@@ -74,13 +82,15 @@ export const createPollReportController = async (
       return;
     }
 
-    await PollReportsModel.query().insert({
-      id: uuidv4(),
-      answer,
-      question,
-      id_appointment: idAppointment,
-      survey_type: surveyType,
-    });
+    for (var question in answers) {
+      await PollReportsModel.query().insert({
+        id: uuidv4(),
+        answer: answers[question],
+        question,
+        id_appointment: idAppointment,
+        survey_type: surveyType,
+      });
+    }
 
     const idUser =
       surveyType === ESurveyType.advisor

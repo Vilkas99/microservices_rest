@@ -1,4 +1,4 @@
-import { Knex } from "knex";
+import Knex = require("knex");
 
 export async function up(knex: Knex): Promise<void> {
   return knex.schema.hasColumn("schedule", "advisor").then((res) => {
@@ -16,8 +16,8 @@ export async function up(knex: Knex): Promise<void> {
 }
 
 export async function down(knex: Knex): Promise<void> {
-  knex.schema.hasColumn("schedule", "advisor").then((res) => {});
-  return knex.schema.alterTable("schedules", (table) => {
+  knex.schema.hasColumn("schedule", "advisor").then((res: any) => {});
+  return knex.schema.alterTable("schedules", (table: any) => {
     table.dropColumn("advisor");
     table.dropColumn("start");
     table.dropColumn("finish");

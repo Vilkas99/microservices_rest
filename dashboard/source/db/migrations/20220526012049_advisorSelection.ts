@@ -1,4 +1,4 @@
-import { Knex } from "knex";
+import Knex = require("knex");
 
 const ADD_APPOINTMENT_CANDIDATES = `CREATE OR REPLACE FUNCTION add_appointment_candidates()
 RETURNS trigger
@@ -77,8 +77,11 @@ export async function up(knex: Knex): Promise<void> {
     })
     .createTable("current_period", function (table) {
       table.boolean("id").primary().defaultTo(true);
+      //@ts-ignore
       table.smallint("period").notNullable();
+      //@ts-ignore
       table.check("??", ["id"], "unique_entry_check");
+      //@ts-ignore
       table.check(
         "?? >= 1 AND ?? <= 3",
         ["period", "period"],
