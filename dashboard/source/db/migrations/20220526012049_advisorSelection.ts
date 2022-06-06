@@ -1,5 +1,4 @@
 import { Knex } from "knex";
-
 const ADD_APPOINTMENT_CANDIDATES = `CREATE OR REPLACE FUNCTION add_appointment_candidates()
 RETURNS trigger
 AS
@@ -27,7 +26,7 @@ BEGIN
         					WHERE NEW.date::time >= start::time AND NEW.date::time <= finish::time
                             AND day = (SELECT dayOfWeek FROM DayOfWeekES WHERE day = EXTRACT(dow FROM NEW.date))
         					AND period = (SELECT period FROM current_period))
-        AND semester > (SELECT semester FROM subjects WHERE id = NEW.id_subject);
+        AND semester > ANY (SELECT semester FROM "career-subject" WHERE id_subject = NEW.id_subject);
 
     RETURN NEW;
 
@@ -77,8 +76,11 @@ export async function up(knex: Knex): Promise<void> {
     })
     .createTable("current_period", function (table) {
       table.boolean("id").primary().defaultTo(true);
+      //@ts-ignore
       table.smallint("period").notNullable();
+      //@ts-ignore
       table.check("??", ["id"], "unique_entry_check");
+      //@ts-ignore
       table.check(
         "?? >= 1 AND ?? <= 3",
         ["period", "period"],

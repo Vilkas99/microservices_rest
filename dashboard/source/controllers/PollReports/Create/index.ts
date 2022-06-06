@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { v4 as uuidv4 } from "uuid";
 import redisClient from "../../../redis";
 import { paramNotPresent } from "../../../utils/functions";
+import { isBoolean, isString, isUser, isUUID } from "../../../utils/functions";
 
 const PollReportsModel = require("../../../models/PollReports");
 const AppointmentModel = require("../../../models/Appointment");
@@ -18,7 +19,8 @@ const createPollReportWebSocket = async (idUser: string, body: any) => {
   }
 };
 
-// Endpoint que obtiene las preguntas en orden de una encuesta dado un tipo de encuesta
+// Endpoint que crea un reporte de respuestas de encuesta para una asesoría, para el asesor o asesorado
+
 export const createPollReportController = async (
   req: Request,
   res: Response
@@ -28,12 +30,44 @@ export const createPollReportController = async (
     student = "student",
   }
 
-  const { answer, question, idAppointment, surveyType } = req.body;
+  const { questionsArray, surveyType, idUser } = req.body;
 
-  if (paramNotPresent(answer, res, "answer")) return;
-  if (paramNotPresent(question, res, "question")) return;
-  if (paramNotPresent(idAppointment, res, "id_appointment")) return;
-  if (paramNotPresent(surveyType, res, "survey_type")) return;
+  if (idUser === undefined) {
+    res.status(400).send("Error: idUser is undefined");
+    return;
+  }
+
+  if (!isString(idUser)) {
+    res.status(400).send("Error: idUser is not a string");
+    return;
+  } else if (idUser === "") {
+    res.status(400).send("Error: idUser was not provided by client");
+    return;
+  }
+
+  if (!isUUID(idUser)) {
+    res.status(400).send("idUser is not a valid UUID.");
+    return;
+  }
+
+  if (!(await isUser(idUser))) {
+    res.status(400).send("Error: user is not logged in");
+    return;
+  }
+
+  if (
+    (questionsArray &&
+      Object.keys(questionsArray).length === 0 &&
+      Object.getPrototypeOf(questionsArray) === Object.prototype) ||
+    questionsArray === undefined ||
+    questionsArray === null
+  ) {
+    res.status(400).send("Error: No questions were provided");
+    return;
+  }
+
+  if (paramNotPresent(questionsArray, res, "questions")) return;
+  if (paramNotPresent(surveyType, res, "surveyType")) return;
   if (!Object.values(ESurveyType).includes(surveyType as ESurveyType)) {
     res
       .status(400)
@@ -44,50 +78,17 @@ export const createPollReportController = async (
   }
 
   try {
-    const appointmentObject: any = await AppointmentModel.query()
-      .select("id")
-      .from("appointments")
-      .where("id", idAppointment);
-    if (appointmentObject === undefined || appointmentObject.length === 0) {
-      res.status(404).send("Error: Appointment not found.");
-      return;
+    for (var question in questionsArray) {
+      await PollReportsModel.query().insert({
+        id: uuidv4(),
+        answer: questionsArray[question],
+        question,
+        id_appointment: questionsArray,
+        survey_type: surveyType,
+      });
     }
 
-    const idUserObject: any = await AppointmentUserModel.query()
-      .select("id_student", "id_advisor")
-      .from("appointments-user")
-      .where("id_appointment", idAppointment);
-    if (idUserObject === undefined || idUserObject.length === 0) {
-      res.status(404).send("Error: Appointment-user not found.");
-      return;
-    }
-
-    const pollReportObject: any = await PollReportsModel.query()
-      .select("id")
-      .from("poll-reports")
-      .where("answer", answer)
-      .where("question", question)
-      .where("id_appointment", idAppointment)
-      .where("survey_type", surveyType);
-    if (pollReportObject.length !== 0) {
-      res.status(404).send("Error: Poll appointment already answered.");
-      return;
-    }
-
-    await PollReportsModel.query().insert({
-      id: uuidv4(),
-      answer,
-      question,
-      id_appointment: idAppointment,
-      survey_type: surveyType,
-    });
-
-    const idUser =
-      surveyType === ESurveyType.advisor
-        ? idUserObject[0]["id_advisor"]
-        : idUserObject[0]["id_student"];
-
-    await createPollReportWebSocket(idUser, req.body);
+    await createPollReportWebSocket(idUser.toString(), req.body);
 
     res.status(200).send("Action completed: A pollReport has been created");
   } catch (error) {
