@@ -11,6 +11,11 @@ enum EStatus {
   CANCELED = "CANCELED",
 }
 
+enum ECandidateStatus {
+  PENDING = "PENDING",
+  AVILABLE = "AVILABLE",
+}
+
 interface IIdsAppointmentDataMod {
   id_advisor?: string;
   id_admin?: string;
@@ -33,9 +38,9 @@ interface IUpdateaAppointment {
 }
 
 interface IUpdateaCandidate {
-  id_appointment: string;
-  id_user: string;
-  newState: EStatus;
+  idAppointment: string;
+  idAdvisor: string;
+  newState: ECandidateStatus;
 }
 
 const notificationForStudent = (
@@ -80,19 +85,19 @@ const notificationForUsers = (detailsChanges: IIdsAppointmentDataMod) => {
 };
 
 export const updateCandidate = async (req: Request, res: Response) => {
-  const { id_appointment, id_user, newState }: IUpdateaCandidate = req.body;
-
+  console.log("Caca:");
+  const { idAppointment, idAdvisor, newState }: IUpdateaCandidate = req.body;
   try {
-    await db("appointments-advisorCandidates")
+    await db("appointment-advisorCandidates")
       .where({
-        id_appointment: id_appointment,
-        id_advisor: id_user,
+        id_appointment: idAppointment,
+        id_advisor: idAdvisor,
       })
-      .update("status", "ACTIVE");
+      .update("status", newState);
   } catch (error) {
+    console.log("Caca2:");
+    console.log(error);
     res.send(error);
-    console.error(error);
-    return;
   }
 
   res.sendStatus(200);

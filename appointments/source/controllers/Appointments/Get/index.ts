@@ -330,7 +330,7 @@ export const getPossibleDates = async (req: Request, res: Response) => {
         const finishMXDate = new Date(schedule["finish"]);
 
         let howManyHours =
-          finishMXDate.getUTCHours() - startMXDate.getUTCHours();
+          finishMXDate.getUTCHours() - startMXDate.getUTCHours() - 1;
         if (howManyHours < 0) {
           howManyHours = 24 + howManyHours;
         }

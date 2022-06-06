@@ -23,6 +23,6 @@ router.get("/email", email2);
 router.get("/allAppointments", getAll);
 router.get("/possibleDates", getPossibleDates);
 router.get("/candidates", getCandidates);
-router.get("/updateCandidates", updateCandidate);
+router.patch("/updateCandidates", updateCandidate);
 
 module.exports = router;
