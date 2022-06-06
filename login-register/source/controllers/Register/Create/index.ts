@@ -65,7 +65,7 @@ export const createUser = async (req: Request, res: Response) => {
       });
 
       //Insert user data in careers table if type is advisor or student
-      if (EType.student === type || EType.advisor === type) {
+      if (EType.root !== type) {
         const entryCareerUserId = uuid();
         await UserCareerModel.query().insert({
           id: entryCareerUserId,

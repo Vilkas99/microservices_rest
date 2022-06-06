@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import db from "../../../db/db";
 
 const UserModel = require("../../../models/User");
+const UserCareerModel = require("../../../models/UserCareer");
 
 export const getUserData = async (req: Request, res: Response) => {
   const { id } = req.query;
@@ -17,11 +18,13 @@ export const getUserData = async (req: Request, res: Response) => {
         userData = await UserModel.query()
           .findById(id)
           .withGraphFetched("career")
+          .withGraphFetched("userSemesters")
           .withGraphFetched("schedules");
-      } else if (userType[0].type === "student") {
+      } else if (userType[0].type !== "root") {
         userData = await UserModel.query()
           .findById(id)
-          .withGraphFetched("career");
+          .withGraphFetched("career")
+          .withGraphFetched("userSemesters");
       } else {
         userData = await UserModel.query().findById(id);
       }
@@ -49,11 +52,13 @@ export const getAllUsersTypeData = async (req: Request, res: Response) => {
       allUsersData = await UserModel.query()
         .where("type", type)
         .withGraphFetched("career")
+        .withGraphFetched("userSemesters")
         .withGraphFetched("schedules");
-    } else if (type === "student") {
+    } else if (type !== "root") {
       allUsersData = await UserModel.query()
         .where("type", type)
-        .withGraphFetched("career");
+        .withGraphFetched("career")
+        .withGraphFetched("userSemesters");
     } else {
       allUsersData = await UserModel.query().where("type", type);
     }
