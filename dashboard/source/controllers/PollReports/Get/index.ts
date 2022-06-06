@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { isUUID } from "../../../utils/functions";
 
 const PollReportsModel = require("../../../models/PollReports");
 
@@ -15,10 +16,21 @@ export const getPollReportController = async (req: Request, res: Response) => {
 
   const { idAppointment } = req.query;
 
-  if (!isString(idAppointment))
-    res.status(400).send("Error: IdAppointment is not a string");
-  else if (idAppointment === "") {
-    res.status(400).send("Error: IdAppointment was not provided by client");
+  if (idAppointment === undefined) {
+    res.status(400).send("Error: idAppointment is undefined");
+    return;
+  }
+
+  if (!isString(idAppointment)) {
+    res.status(400).send("Error: idAppointment is not a string");
+    return;
+  } else if (idAppointment === "") {
+    res.status(400).send("Error: idAppointment was not provided by client");
+    return;
+  }
+
+  if (!isUUID(idAppointment)) {
+    res.status(400).send("idAppointment is not a valid UUID.");
     return;
   }
 
