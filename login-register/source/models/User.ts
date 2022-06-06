@@ -8,6 +8,7 @@ class UserModel extends Password(Model) {
   static get relationMappings(): RelationMappings | RelationMappingsThunk {
     const Appointment = require("./Appointment");
     const Career = require("./Career");
+    const UserCareer = require("./UserCareer");
     const Schedules = require("./Schedules");
 
     return {
@@ -47,6 +48,14 @@ class UserModel extends Password(Model) {
             to: "appointments-user.id_appointment",
           },
           to: "appointments.id",
+        },
+      },
+      userSemesters: {
+        relation: Model.HasManyRelation,
+        modelClass: UserCareer,
+        join: {
+          from: "users.id",
+          to: "users-career.id_user",
         },
       },
       career: {
