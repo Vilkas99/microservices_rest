@@ -54,6 +54,11 @@ export const deleteSubjectController = async (req: Request, res: Response) => {
       return;
     }
 
+    await SubjectModel.query()
+      .from("career-subject")
+      .where("id_subject", id)
+      .del();
+
     await SubjectModel.query().from("subjects").where("id", id).del();
 
     await deleteSubjectWebSocket(idAdmin, req.body);
