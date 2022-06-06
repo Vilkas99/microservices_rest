@@ -40,7 +40,6 @@ router.use((req, res, next) => {
 /** Server */
 const httpServer = http.createServer(router);
 
-const PORT: any = 6070;
-httpServer.listen(PORT, () =>
-  console.log(`The server is running on port ${PORT}`)
+httpServer.listen(process.env.PORT || 6070, () =>
+  console.log(`The server is running on port 6070`)
 );

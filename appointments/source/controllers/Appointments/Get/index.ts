@@ -1,5 +1,6 @@
 import { parseISO } from "date-fns";
 import { Request, Response } from "express";
+import { email } from "../../../email/index";
 import db from "../../../db/db";
 
 const AppointmentModel = require("../../../models/Appointment");
@@ -36,8 +37,17 @@ interface IIdsAppointmentDataMod {
   id_admin?: string;
 }
 
-// ---------------------- PRIMERA -------------------------------------------
-// Endpoint que obtiene la asesoría más reciente de un admin
+/*
+-------------EJEMPLO DE COMO USAR LA FUNCION DE EMAIL------------------------
+*/
+
+export const email2 = async (req: Request, res: Response) => {
+  email(
+    "a01733922@tec.mx",
+    "Pruebita",
+    "<h1>PAE</h1><h2>Recuperar contraseña</h2>"
+  );
+};
 
 export const getAdmin = async (req: Request, res: Response) => {
   const { id, id_type } = req.query;
@@ -79,15 +89,29 @@ export const getAdmin = async (req: Request, res: Response) => {
       .where(value, id as string)
       .orderBy("appointments.created_at", "desc");
     res.json(adminFirstAppointment);
-
     res.statusCode = 200;
   } catch (error) {
     res.send(error);
   }
 };
 
-// ---------------------- SEGUNDA -------------------------------------------
-// Endpoint que obtiene la asesoría activa más reciente de un admin
+export const getCandidates = async (req: Request, res: Response) => {
+  const { id_appointment } = req.query;
+
+  try {
+    const adminFirstAppointment: any = await db
+      .select("appointments-advisorCandidates.*")
+      .from("appointments-advisorCandidates")
+      .where({
+        "appointments-advisorCandidates.status": "ACTIVE",
+        "appointments-advisorCandidates.id_appointment": id_appointment,
+      });
+    res.json(adminFirstAppointment);
+    res.statusCode = 200;
+  } catch (error) {
+    res.send(error);
+  }
+};
 
 export const getStatus = async (req: Request, res: Response) => {
   const id = req.query["id"];
@@ -123,9 +147,6 @@ export const getStatus = async (req: Request, res: Response) => {
     res.send(error);
   }
 };
-
-// ---------------------- TERCERA -------------------------------------------
-// Todas las asesorías dependiendo del tipo de usuario
 
 const getSubject = async (id: string) => {
   const mySubject = await SubjectsModel.query().findById(id).select("name");
@@ -257,57 +278,113 @@ export const getObjection = async (req: Request, res: Response) => {
 };
 
 export const getPossibleDates = async (req: Request, res: Response) => {
+  const getDatesOfNextWeeksDays = (dayOfWeek: number, howManyWeeks: number) => {
+    let dates = [];
+
+    const refDate = new Date();
+    refDate.setHours(0, 0, 0, 0);
+
+    for (let i = 0; i < howManyWeeks; i++) {
+      refDate.setDate(
+        refDate.getDate() + 1 + ((dayOfWeek + 7 - refDate.getDay() - 1) % 7)
+      );
+      dates.push(new Date(refDate));
+    }
+    return dates;
+  };
+
   const { idSubject } = req.query;
   if (idSubject === undefined) {
     res.status(400);
     throw "Query info was not provided";
   }
+
   db.raw(
-    `SELECT day, start, finish FROM schedules WHERE advisor IN (
+    `SELECT DISTINCT day, start, finish
+    FROM schedules
+    WHERE advisor IN (
     SELECT id_user
     FROM "career-subject" JOIN "users-career" USING(id_career)
     WHERE id_subject = ?
-    AND semester > (SELECT semester FROM subjects WHERE id = ?)
-    AND get_user_weekly_credited_hours(id_user) < 5)`,
+    AND "users-career".semester > (SELECT semester
+                                   FROM "career-subject"
+                                   WHERE id_subject = ?
+                                   AND "career-subject".id_career = "users-career".id_career)
+    AND get_user_weekly_credited_hours(id_user) < 5)
+    `,
     [idSubject.toString(), idSubject.toString()]
-  ).then((resp) => {
-    var possibleDates = new Array();
-    let x = 0;
-    const len = resp.rows.length;
+  )
+    .then((resp) => {
+      // resp.rows tiene los horarios de quienes pueden darla, pero no se ha filtrado los que ya están ocupados
 
-    for (let i = 0; i < len; i++) {
-      const dateObject = new Date(Date.parse(resp.rows[x].start));
-      const day = resp.rows[x].day;
-      const hours = dateObject.getUTCHours();
-      const element = day.concat(hours);
-      if (possibleDates.includes(element)) {
-        resp.rows.splice(x, 1);
-      } else {
-        x = x + 1;
-        possibleDates.push(element);
+      let schedules: Date[] = [];
+      for (const schedule of resp.rows) {
+        const dayOfWeek = ["Do", "Lu", "Ma", "Mi", "Ju", "Vi", "Sá"].indexOf(
+          schedule["day"].slice(0, 2)
+        );
+
+        const datesToCheck = getDatesOfNextWeeksDays(dayOfWeek, 1);
+
+        // este paso es muy necesario porque, por el momento, no sabemos si el server va a estar en hora de cdmx
+        const startMXDate = new Date(schedule["start"]);
+        const finishMXDate = new Date(schedule["finish"]);
+
+        let howManyHours =
+          finishMXDate.getUTCHours() - startMXDate.getUTCHours();
+        if (howManyHours < 0) {
+          howManyHours = 24 + howManyHours;
+        }
+
+        for (let i = 0; i <= howManyHours; i++) {
+          for (const dateToCheck of datesToCheck) {
+            const timestamp = new Date(new Date().toUTCString().slice(0, 25));
+            timestamp.setUTCMonth(
+              dateToCheck.getUTCMonth(),
+              dateToCheck.getUTCDate()
+            );
+            timestamp.setUTCHours(startMXDate.getUTCHours() + i, 0, 0, 0);
+            schedules.push(new Date(timestamp));
+          }
+        }
       }
-    }
 
-    res.status(200);
-    res.json(resp.rows);
-  });
-  /*await db("schedules")
-    .select("day", "start", "finish")
-    .whereIn("advisor", function () {
-      this.select("id_user").fromRaw()*/
-  /*
-        `
-        FROM "career-subject" JOIN "users-career" USING(id_career)
-        WHERE id_subject = ??
-        AND semester > (SELECT semester FROM subjects WHERE id = ??)
-        AND get_user_weekly_credited_hours(id_user) < 5)`,
-        [idSubject.toString(), idSubject.toString()]
-        
-    });*/
-  //res.status(200);
-  //res.json(info);
-  try {
-  } catch (error) {
-    res.send(error);
-  }
+      let nonAvilableSchedules = new Set<number>();
+      db.select("date")
+        .from("appointments")
+        .where("status", "ACCEPTED")
+        .then((result) => {
+          for (const entry of result) {
+            nonAvilableSchedules.add(
+              new Date(
+                entry["date"].toLocaleString("en-US", {
+                  timeZone: "America/Mexico_City",
+                })
+              ).getTime()
+            );
+          }
+          // eliminar los horarios repetidos y en los que ya hay una asesoría aceptada
+          schedules = schedules.filter(
+            (date, i, self) =>
+              self.findIndex((d) => d.getTime() === date.getTime()) === i &&
+              !nonAvilableSchedules.has(date.getTime())
+          );
+
+          let response: { day: string; hour: string }[] = [];
+          for (const schedule of schedules) {
+            const s = schedule.toLocaleString("es-MX", {
+              weekday: "long",
+              timeZone: "America/Mexico_City",
+            });
+            response.push({
+              day: `${s[0].toUpperCase()}${s.slice(1)}`,
+              hour: schedule.toUTCString(),
+            });
+          }
+          res.status(200).send(response);
+        });
+    })
+    .catch((error) => {
+      console.log(error);
+      res.send(error);
+    });
 };
