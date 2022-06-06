@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { v4 as uuidv4 } from "uuid";
 import redisClient from "../../../redis";
 import { paramNotPresent } from "../../../utils/functions";
+import { isBoolean, isString, isUser, isUUID } from "../../../utils/functions";
 
 const PollReportsModel = require("../../../models/PollReports");
 const AppointmentModel = require("../../../models/Appointment");
@@ -28,13 +29,31 @@ export const createPollReportController = async (
     advisor = "advisor",
     student = "student",
   }
-  enum EQuestionType {
-    text = "text",
-    scale = "scale",
-    yesOrNo = "yesOrNo",
+
+  const { questionsArray, surveyType, idUser } = req.body;
+
+  if (idUser === undefined) {
+    res.status(400).send("Error: idUser is undefined");
+    return;
   }
 
-  const { questionsArray, surveyType } = req.body;
+  if (!isString(idUser)) {
+    res.status(400).send("Error: idUser is not a string");
+    return;
+  } else if (idUser === "") {
+    res.status(400).send("Error: idUser was not provided by client");
+    return;
+  }
+
+  if (!isUUID(idUser)) {
+    res.status(400).send("idUser is not a valid UUID.");
+    return;
+  }
+
+  if (!(await isUser(idUser))) {
+    res.status(400).send("Error: user is not logged in");
+    return;
+  }
 
   if (
     (questionsArray &&
@@ -60,8 +79,6 @@ export const createPollReportController = async (
 
   try {
     for (var question in questionsArray) {
-    }
-    for (var question in questionsArray) {
       await PollReportsModel.query().insert({
         id: uuidv4(),
         answer: questionsArray[question],
@@ -70,6 +87,8 @@ export const createPollReportController = async (
         survey_type: surveyType,
       });
     }
+
+    await createPollReportWebSocket(idUser.toString(), req.body);
 
     res.status(200).send("Action completed: A pollReport has been created");
   } catch (error) {
