@@ -10,6 +10,7 @@ import {
   getAll,
   getPossibleDates,
   getCandidates,
+  getAppointmentBasicInfo,
 } from "../../controllers/Appointments/Get";
 
 const express = require("express");
@@ -17,6 +18,7 @@ const router = express.Router();
 
 router.post("/", createController);
 router.patch("/", updateController);
+router.get("/basicInfo", getAppointmentBasicInfo);
 router.get("/admin", getAdmin);
 router.get("/status", getStatus);
 router.get("/email", email2);

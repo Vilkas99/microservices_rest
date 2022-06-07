@@ -14,6 +14,7 @@ enum EStatus {
 enum ECandidateStatus {
   PENDING = "PENDING",
   AVILABLE = "AVILABLE",
+  REJECTED = "REJECTED",
 }
 
 interface IIdsAppointmentDataMod {
@@ -85,9 +86,19 @@ const notificationForUsers = (detailsChanges: IIdsAppointmentDataMod) => {
 };
 
 export const updateCandidate = async (req: Request, res: Response) => {
-  console.log("Caca:");
   const { idAppointment, idAdvisor, newState }: IUpdateaCandidate = req.body;
+
   try {
+    if (newState == ECandidateStatus.REJECTED) {
+      await db("appointment-advisorCandidates")
+        .where({
+          id_appointment: idAppointment,
+          id_advisor: idAdvisor,
+        })
+        .delete();
+      res.sendStatus(200);
+    }
+
     await db("appointment-advisorCandidates")
       .where({
         id_appointment: idAppointment,
@@ -95,7 +106,6 @@ export const updateCandidate = async (req: Request, res: Response) => {
       })
       .update("status", newState);
   } catch (error) {
-    console.log("Caca2:");
     console.log(error);
     res.send(error);
   }
