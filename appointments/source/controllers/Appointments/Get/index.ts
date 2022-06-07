@@ -156,17 +156,20 @@ const getSubject = async (id: string) => {
 const addFinalInfo = async (fullInfo: any) => {
   const finalInfo: any = [];
   for (const object of fullInfo) {
-    const id = object.appointment.id_subject;
-    let subject = await getSubject(id);
-    //TODO: Add semester to student profile
-    finalInfo.push({
-      subject: subject,
-      appointment: object.appointment,
-      student: object.student[0],
-      advisor: object.advisor[0],
-      admin: object.admin[0],
-    });
+    if (object != null && object.appointment != null) {
+      const id = object.appointment.id_subject;
+      let subject = await getSubject(id);
+      //TODO: Add semester to student profile
+      finalInfo.push({
+        subject: subject,
+        appointment: object.appointment,
+        student: object.student[0],
+        advisor: object.advisor[0],
+        admin: object.admin[0],
+      });
+    }
   }
+
   return finalInfo;
 };
 
