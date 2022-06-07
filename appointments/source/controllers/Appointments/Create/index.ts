@@ -40,12 +40,14 @@ export const createController = async (
     });
 
     try {
+      const idAdmin = await db("users").first("id").where("type", "admin");
+
       await db("appointments-user").insert({
         id: uuidv4(),
         id_appointment: newAppointmentId,
         id_student: idPetitioner,
         id_advisor: null,
-        id_admin: "15bc1e73-20ad-43df-929b-4044da97e4e3",
+        id_admin: idAdmin["id"],
       });
 
       await axios
@@ -53,7 +55,7 @@ export const createController = async (
           //TODO: Reemplazar por una variable env
           title: "Solicitud de Asesoría",
           description: "Una nueva asesoría se ha solicitado",
-          idUser: "15bc1e73-20ad-43df-929b-4044da97e4e3", //TODO: Reemplazar con una variable de entorno (O mejor aun, hacer una consulta a la tabla de users, y seleccionar un admin al azar)
+          idUser: idAdmin["id"],
           type: ENotificationType.NEW_REQUEST,
         })
         .then((res) => console.log("Notification Created"))

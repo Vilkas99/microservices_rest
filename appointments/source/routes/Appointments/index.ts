@@ -10,6 +10,7 @@ import {
   getAll,
   getPossibleDates,
   getCandidates,
+  getAppointmentBasicInfo,
 } from "../../controllers/Appointments/Get";
 
 const express = require("express");
@@ -17,12 +18,13 @@ const router = express.Router();
 
 router.post("/", createController);
 router.patch("/", updateController);
+router.get("/basicInfo", getAppointmentBasicInfo);
 router.get("/admin", getAdmin);
 router.get("/status", getStatus);
 router.get("/email", email2);
 router.get("/allAppointments", getAll);
 router.get("/possibleDates", getPossibleDates);
 router.get("/candidates", getCandidates);
-router.get("/updateCandidates", updateCandidate);
+router.patch("/updateCandidates", updateCandidate);
 
 module.exports = router;

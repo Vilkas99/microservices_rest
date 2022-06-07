@@ -1,4 +1,3 @@
-import { parseISO } from "date-fns";
 import { Request, Response } from "express";
 import { email } from "../../../email/index";
 import db from "../../../db/db";
@@ -98,17 +97,53 @@ export const getAdmin = async (req: Request, res: Response) => {
 export const getCandidates = async (req: Request, res: Response) => {
   const { id_appointment } = req.query;
 
+  if (id_appointment === undefined) {
+    res.status(400);
+    throw "Query info was not provided";
+  }
+
   try {
-    const adminFirstAppointment: any = await db
-      .select("appointments-advisorCandidates.*")
-      .from("appointments-advisorCandidates")
-      .where({
-        "appointments-advisorCandidates.status": "ACTIVE",
-        "appointments-advisorCandidates.id_appointment": id_appointment,
+    let confirmedAdvisors;
+    await db
+      .raw(
+        `SELECT DISTINCT ON ("appointment-advisorCandidates"."id_advisor") "id_advisor",
+      "users"."name", get_user_weekly_credited_hours("appointment-advisorCandidates"."id_advisor") as completed_hours,
+      "careers"."name" as career_name, "users-career"."semester"
+    FROM ( "appointment-advisorCandidates"
+    INNER JOIN "users" ON "appointment-advisorCandidates"."id_advisor" = "users"."id"
+    INNER JOIN "users-career" ON "users"."id" = "users-career"."id_user"
+    INNER JOIN "careers" ON "careers"."id" = "users-career"."id_career" )
+    WHERE "id_appointment" = ?
+    AND "appointment-advisorCandidates"."status" = 'ACCEPTED'`,
+        [id_appointment.toString()]
+      )
+      .then((resp) => {
+        confirmedAdvisors = resp.rows;
       });
-    res.json(adminFirstAppointment);
+    let pendingAdvisors;
+    await db
+      .raw(
+        `SELECT DISTINCT ON ("appointment-advisorCandidates"."id_advisor") "id_advisor",
+        "users"."name", get_user_weekly_credited_hours("appointment-advisorCandidates"."id_advisor") as completed_hours,
+        "careers"."name" as career_name, "users-career"."semester"
+      FROM ( "appointment-advisorCandidates"
+      INNER JOIN "users" ON "appointment-advisorCandidates"."id_advisor" = "users"."id"
+      INNER JOIN "users-career" ON "users"."id" = "users-career"."id_user"
+      INNER JOIN "careers" ON "careers"."id" = "users-career"."id_career" )
+      WHERE "id_appointment" = ?
+      AND "appointment-advisorCandidates"."status" = 'PENDING'`,
+        [id_appointment.toString()]
+      )
+      .then((resp) => {
+        pendingAdvisors = resp.rows;
+      });
+    res.json({
+      confirmedAdvisors: confirmedAdvisors,
+      pendingAdvisors: pendingAdvisors,
+    });
     res.statusCode = 200;
   } catch (error) {
+    console.log(error);
     res.send(error);
   }
 };
@@ -314,6 +349,7 @@ export const getPossibleDates = async (req: Request, res: Response) => {
                                    WHERE id_subject = ?
                                    AND "career-subject".id_career = "users-career".id_career)
     AND get_user_weekly_credited_hours(id_user) < 5)
+    AND schedules.period = (SELECT period FROM current_period)
     `,
     [idSubject.toString(), idSubject.toString()]
   )
@@ -333,7 +369,7 @@ export const getPossibleDates = async (req: Request, res: Response) => {
         const finishMXDate = new Date(schedule["finish"]);
 
         let howManyHours =
-          finishMXDate.getUTCHours() - startMXDate.getUTCHours();
+          finishMXDate.getUTCHours() - startMXDate.getUTCHours() - 1;
         if (howManyHours < 0) {
           howManyHours = 24 + howManyHours;
         }
@@ -390,4 +426,23 @@ export const getPossibleDates = async (req: Request, res: Response) => {
       console.log(error);
       res.send(error);
     });
+};
+
+export const getAppointmentBasicInfo = async (req: Request, res: Response) => {
+  const { idAppointment } = req.query;
+
+  try {
+    const info = await AppointmentModel.query()
+      .select(
+        "appointments.date",
+        "appointments.photo_url",
+        "appointments.problem_description"
+      )
+      .findById(idAppointment)
+      .withGraphFetched("subject");
+    res.status(200).send(info);
+  } catch (error) {
+    console.log(error);
+    res.send(error);
+  }
 };
