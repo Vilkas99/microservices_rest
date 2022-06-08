@@ -128,19 +128,6 @@ export const getSubjectCareerSemesterController = async (
 };
 
 export const getAllSubjectsController = async (req: Request, res: Response) => {
-  const { page, limitItems } = req.query;
-  let off = 0;
-  let p = 0;
-  if (page && limitItems) {
-    p = +page;
-    if (p < 1) {
-      res.status(404).send("Error: Index page incorrect.");
-      return;
-    } else {
-      off = (+page - 1) * +limitItems;
-    }
-  }
-
   try {
     const numberSubjects: any = await SubjectModel.query()
       .count("id")
@@ -151,7 +138,7 @@ export const getAllSubjectsController = async (req: Request, res: Response) => {
       materias.id,
       materias.name,
       careers.acronym as careerAcronym,
-      "career-subject".semester FROM (SELECT * FROM subjects LIMIT ${limitItems} OFFSET ${off}) AS materias
+      "career-subject".semester FROM (SELECT * FROM subjects) AS materias
       FULL JOIN "career-subject" ON "career-subject".id_subject = materias.id
       FULL JOIN careers ON "career-subject".id_career = careers.id WHERE materias.id IS NOT NULL`
     );
@@ -167,6 +154,8 @@ export const getAllSubjectsController = async (req: Request, res: Response) => {
     }
 
     let materias: any = [];
+    let resultSubjects: any = [];
+    let numberPages: number = numberSubjects[0].count / 6;
     subjects.rows.forEach((element: any) => {
       const elementInMaterias = materias.findIndex(
         (materia: any) => element.id === materia.id
@@ -189,8 +178,16 @@ export const getAllSubjectsController = async (req: Request, res: Response) => {
         });
       }
     });
+    let x = 0;
+    for (let page = 0; page < numberPages; page++) {
+      resultSubjects.push({
+        page: page + 1,
+        subjects: materias.slice(x, x + 6),
+      });
+      x = x + 6;
+    }
 
-    res.json({ subjects: materias, count: +numberSubjects[0].count });
+    res.json(resultSubjects);
     res.statusCode = 200;
   } catch (error) {
     res.status(500).send(error);
