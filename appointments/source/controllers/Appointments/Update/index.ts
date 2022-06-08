@@ -1,3 +1,4 @@
+import { eachHourOfInterval } from "date-fns";
 import { Request, Response, NextFunction } from "express";
 import db from "../../../db/db";
 import { ENotificationType } from "../../../utils/enums";
@@ -8,6 +9,12 @@ enum EStatus {
   ACCEPTED = "ACCEPTED",
   COMPLETED = "COMPLETED",
   CANCELED = "CANCELED",
+}
+
+enum ECandidateStatus {
+  PENDING = "PENDING",
+  AVILABLE = "AVILABLE",
+  REJECTED = "REJECTED",
 }
 
 interface IIdsAppointmentDataMod {
@@ -29,6 +36,12 @@ interface IUpdateaAppointment {
   idStudent: string;
   baseChanges: IBaseChanges;
   detailChanges: IIdsAppointmentDataMod;
+}
+
+interface IUpdateaCandidate {
+  idAppointment: string;
+  idAdvisor: string;
+  newState: ECandidateStatus;
 }
 
 const notificationForStudent = (
@@ -70,6 +83,34 @@ const notificationForUsers = (detailsChanges: IIdsAppointmentDataMod) => {
       );
     }
   }
+};
+
+export const updateCandidate = async (req: Request, res: Response) => {
+  const { idAppointment, idAdvisor, newState }: IUpdateaCandidate = req.body;
+
+  try {
+    if (newState == ECandidateStatus.REJECTED) {
+      await db("appointment-advisorCandidates")
+        .where({
+          id_appointment: idAppointment,
+          id_advisor: idAdvisor,
+        })
+        .delete();
+      res.sendStatus(200);
+    }
+
+    await db("appointment-advisorCandidates")
+      .where({
+        id_appointment: idAppointment,
+        id_advisor: idAdvisor,
+      })
+      .update("status", newState);
+  } catch (error) {
+    console.log(error);
+    res.send(error);
+  }
+
+  res.sendStatus(200);
 };
 
 export const updateController = async (req: Request, res: Response) => {

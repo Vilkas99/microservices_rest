@@ -37,6 +37,7 @@ export const getSubjectCareerController = async (
 
   let off = 0;
   let p = 0;
+
   if (page && limitItems) {
     p = +page;
     if (p < 1) {
@@ -45,6 +46,9 @@ export const getSubjectCareerController = async (
     } else {
       off = (+page - 1) * +limitItems;
     }
+  } else {
+    res.status(404).send("Error: page and limitItems should not be 0.");
+    return;
   }
 
   try {
@@ -91,9 +95,15 @@ export const getSubjectCareerSemesterController = async (
     return;
   }
 
-  if (!isNumber(semester))
+  if (!isNumber(semester)) {
     res.status(400).send("Error: semester is not a number");
-  else if (semester === "") {
+    return;
+  }
+  if (semester === "") {
+    res.status(400).send("Error: semester was not provided by client");
+    return;
+  }
+  if (semester === undefined) {
     res.status(400).send("Error: semester was not provided by client");
     return;
   }
@@ -108,12 +118,23 @@ export const getSubjectCareerSemesterController = async (
   }
 
   try {
-    const careerSubject: any = await SubjectModel.query()
-      .select("subjects.id", "subjects.name", "subjects.acronym")
-      .from("career-subject")
-      .innerJoin("subjects", "career-subject.id_subject", "subjects.id")
-      .where("career-subject.id_career", idCarrera)
-      .andWhere("career-subject.semester", "=", semester);
+    const careerSubject: any =
+      +semester !== -1
+        ? await SubjectModel.query()
+            .select("subjects.id", "subjects.name", "subjects.acronym")
+            .from("career-subject")
+            .innerJoin("subjects", "career-subject.id_subject", "subjects.id")
+            .where("career-subject.id_career", idCarrera)
+            .andWhere("career-subject.semester", "=", semester)
+        : await db
+            .raw(
+              `SELECT subjects.id, subjects.name, subjects.acronym
+        FROM subjects
+        FULL JOIN "career-subject"
+        ON "career-subject".id_subject = subjects.id
+        WHERE "career-subject".semester IS NULL`
+            )
+            .then((data: any) => data.rows);
 
     if (careerSubject === undefined || careerSubject.length === 0) {
       res.status(404).send("Error: Subjects not found.");
