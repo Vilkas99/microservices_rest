@@ -331,8 +331,8 @@ export const getPossibleDates = async (req: Request, res: Response) => {
     return dates;
   };
 
-  const { idSubject } = req.query;
-  if (idSubject === undefined) {
+  const { idSubject, idPetitioner } = req.query;
+  if (idSubject === undefined || idPetitioner === undefined) {
     res.status(400);
     throw "Query info was not provided";
   }
@@ -341,21 +341,21 @@ export const getPossibleDates = async (req: Request, res: Response) => {
     `SELECT DISTINCT day, start, finish
     FROM schedules
     WHERE advisor IN (
-    SELECT id_user
+    SELECT "users-career".id_user
     FROM "career-subject" JOIN "users-career" USING(id_career)
     WHERE id_subject = ?
     AND "users-career".semester > (SELECT semester
                                    FROM "career-subject"
                                    WHERE id_subject = ?
                                    AND "career-subject".id_career = "users-career".id_career)
-    AND get_user_weekly_credited_hours(id_user) < 5)
+    AND get_user_weekly_credited_hours(id_user) < 5
+    AND "users-career".id_user != ?)
     AND schedules.period = (SELECT period FROM current_period)
     `,
-    [idSubject.toString(), idSubject.toString()]
+    [idSubject.toString(), idSubject.toString(), idPetitioner.toString()]
   )
     .then((resp) => {
       // resp.rows tiene los horarios de quienes pueden darla, pero no se ha filtrado los que ya están ocupados
-
       let schedules: Date[] = [];
       for (const schedule of resp.rows) {
         const dayOfWeek = ["Do", "Lu", "Ma", "Mi", "Ju", "Vi", "Sá"].indexOf(
@@ -424,7 +424,7 @@ export const getPossibleDates = async (req: Request, res: Response) => {
     })
     .catch((error) => {
       console.log(error);
-      res.send(error);
+      res.status(500).send("Could not complete request");
     });
 };
 
