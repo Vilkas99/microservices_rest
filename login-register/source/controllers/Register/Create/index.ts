@@ -73,7 +73,7 @@ export const createUser = async (req: Request, res: Response) => {
           id_career: career,
           semester: semester,
         });
-        if (careerDD != undefined) {
+        if (careerDD !== undefined) {
           const entrySecondCareerUserId = uuid();
           await UserCareerModel.query().insert({
             id: entrySecondCareerUserId,
