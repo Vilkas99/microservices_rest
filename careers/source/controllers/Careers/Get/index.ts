@@ -74,7 +74,7 @@ export const getCareerDoubleDegreeController = async (
 ) => {
   try {
     const career: any = await CareersModel.query()
-      .select("id", "name", "acronym")
+      .select("id", "name", "acronym", "doubleDegree", "length")
       .from("careers")
       .where("doubleDegree", true);
 
@@ -93,7 +93,7 @@ export const getCareerDoubleDegreeController = async (
 export const getAllCareersController = async (req: Request, res: Response) => {
   try {
     const careers: any = await CareersModel.query()
-      .select("id", "name", "acronym")
+      .select("id", "name", "acronym", "doubleDegree", "length")
       .from("careers");
 
     if (careers === undefined || careers.length === 0) {
