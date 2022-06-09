@@ -31,6 +31,7 @@
     "express": "^4.17.2",
     "knex": "^1.0.3",
     "morgan": "^1.10.0",
+    "node-cron": "^3.0.1",
     "nodemailer": "^6.7.5",
     "nodemon": "^2.0.15",
     "objection": "^3.0.1",
@@ -41,5 +42,8 @@
     "typescript": "^4.5.5",
     "unique-names-generator": "^4.6.0",
     "uuidv4": "^6.2.12"
+  },
+  "devDependencies": {
+    "@types/node-cron": "^3.0.1"
   }
 }

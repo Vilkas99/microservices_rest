@@ -24,14 +24,16 @@ export const getUserLogin = async (req: Request, res: Response) => {
             userId: curUser.id,
           });
         } else {
-          res.json({
+          res.status(400).json({
             status: "Bad request",
+            reason: 0,
             msg: "Wrong password",
           });
         }
       } else {
-        res.json({
+        res.status(400).json({
           status: "Bad request",
+          reason: 1,
           msg: "Given email is not active",
         });
       }

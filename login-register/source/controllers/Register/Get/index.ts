@@ -7,10 +7,8 @@ const UserCareerModel = require("../../../models/UserCareer");
 export const getUserData = async (req: Request, res: Response) => {
   const { id } = req.query;
 
-  console.log("Recibiendo ID: ", id);
-
   try {
-    if (id !== undefined) {
+    if (id !== undefined && id !== "undefined") {
       let userType: any;
       userType = await UserModel.query().select("type").where("id", id);
       let userData: any;
