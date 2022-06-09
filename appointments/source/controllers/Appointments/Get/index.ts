@@ -349,7 +349,8 @@ export const getPossibleDates = async (req: Request, res: Response) => {
                                    WHERE id_subject = ?
                                    AND "career-subject".id_career = "users-career".id_career)
     AND get_user_weekly_credited_hours(id_user) < 5
-    AND "users-career".id_user != ?)
+    AND "users-career".id_user != ?
+    AND "users-career".id_user IN (SELECT id FROM users WHERE status = 'ACTIVE'))
     AND schedules.period = (SELECT period FROM current_period)
     `,
     [idSubject.toString(), idSubject.toString(), idPetitioner.toString()]

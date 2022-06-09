@@ -1,7 +1,11 @@
 import { Request, Response, NextFunction } from "express";
 import { uuid } from "uuidv4";
+import { sendEmail } from "../../../email/index";
+import { verificationEmailForUser } from "../../../email/templates/confirmationEmal/template";
+import { generate as genereteToken } from "rand-token";
 import "objection-password";
 import db from "../../../db/db";
+
 const UserModel = require("../../../models/User");
 const UserCareerModel = require("../../../models/UserCareer");
 const SchedulesModel = require("../../../models/Schedules");
@@ -60,9 +64,29 @@ export const createUser = async (req: Request, res: Response) => {
         name: name,
         email: email,
         password: password,
-        status: status,
+        status: "INACTIVE",
         type: type,
       });
+
+      const confirmationToken = genereteToken(32);
+
+      await db("emailVerifications").insert({
+        id: uuid(),
+        id_user: newUserId,
+        token: confirmationToken,
+        verified: false,
+      });
+
+      // Send verification email
+      sendEmail(
+        email,
+        "Confirma tu cuenta de PAE",
+        verificationEmailForUser(
+          name,
+          `http://localhost:6060/verififyEmail?tkn=${confirmationToken}`,
+          `http://localhost:6060/verififyEmail?tkn=${confirmationToken}/cancel`
+        )
+      );
 
       //Insert user data in careers table if type is advisor or student
       if (EType.root !== type) {

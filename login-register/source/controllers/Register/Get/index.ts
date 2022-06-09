@@ -7,31 +7,40 @@ const UserCareerModel = require("../../../models/UserCareer");
 export const getUserData = async (req: Request, res: Response) => {
   const { id } = req.query;
 
-  console.log("Recibiendo ID: ", id);
-
   try {
-    if (id !== undefined) {
+    if (id !== undefined && id !== "undefined") {
       let userType: any;
       userType = await UserModel.query().select("type").where("id", id);
       let userData: any;
-      if (userType[0].type === "advisor") {
-        userData = await UserModel.query()
-          .findById(id)
-          .withGraphFetched("career")
-          .withGraphFetched("userSemesters")
-          .withGraphFetched("schedules");
-      } else if (userType[0].type !== "root") {
-        userData = await UserModel.query()
-          .findById(id)
-          .withGraphFetched("career")
-          .withGraphFetched("userSemesters");
+      if (userType.length > 0) {
+        if (userType[0].type === "advisor") {
+          userData = await UserModel.query()
+            .select("id", "status", "name", "email", "type", "configuration")
+            .findById(id)
+            .withGraphFetched("career")
+            .withGraphFetched("userSemesters")
+            .withGraphFetched("schedules");
+        } else if (userType[0].type !== "root") {
+          userData = await UserModel.query()
+            .select("id", "status", "name", "email", "type", "configuration")
+            .findById(id)
+            .withGraphFetched("career")
+            .withGraphFetched("userSemesters");
+        } else {
+          userData = await UserModel.query()
+            .select("id", "status", "name", "email", "type", "configuration")
+            .findById(id);
+        }
+        res.json({
+          status: "OK",
+          user: userData,
+        });
       } else {
-        userData = await UserModel.query().findById(id);
+        res.json({
+          status: "Bad request",
+          msg: "Given user does not exist",
+        });
       }
-      res.json({
-        status: "OK",
-        user: userData,
-      });
     } else {
       res.json({
         status: "Bad request",
