@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { uuid } from "uuidv4";
+import { v4 } from "uuid";
 import { sendEmail } from "../../../email/index";
 import { verificationEmailForUser } from "../../../email/templates/confirmationEmal/template";
 import { generate as genereteToken } from "rand-token";
@@ -22,6 +22,12 @@ enum EStatus {
   ACTIVE = "ACTIVE",
   INACTIVE = "INACTIVE",
 }
+
+enum EVerificationStatus {
+  PENDING = "PENDING",
+  VERIFIED = "VERIFIED",
+}
+
 interface INewUserData {
   name: string;
   email: string;
@@ -53,7 +59,7 @@ export const createUser = async (req: Request, res: Response) => {
     type,
   } = req.body;
   try {
-    let newUserId = uuid();
+    let newUserId = v4();
     let alreadyExists = await UserModel.query()
       .select("email")
       .where("email", email);
@@ -71,10 +77,10 @@ export const createUser = async (req: Request, res: Response) => {
       const confirmationToken = genereteToken(32);
 
       await db("emailVerifications").insert({
-        id: uuid(),
+        id: v4(),
         id_user: newUserId,
         token: confirmationToken,
-        verified: false,
+        status: EVerificationStatus.PENDING,
       });
 
       // Send verification email
@@ -83,14 +89,14 @@ export const createUser = async (req: Request, res: Response) => {
         "Confirma tu cuenta de PAE",
         verificationEmailForUser(
           name,
-          `http://localhost:6060/verififyEmail?tkn=${confirmationToken}`,
-          `http://localhost:6060/verififyEmail?tkn=${confirmationToken}/cancel`
+          `http://localhost:3000/verififyEmail/${confirmationToken}`,
+          `http://localhost:3000/verififyEmail/${confirmationToken}/cancel`
         )
       );
 
       //Insert user data in careers table if type is advisor or student
       if (EType.root !== type) {
-        const entryCareerUserId = uuid();
+        const entryCareerUserId = v4();
         await UserCareerModel.query().insert({
           id: entryCareerUserId,
           id_user: newUserId,
@@ -98,7 +104,7 @@ export const createUser = async (req: Request, res: Response) => {
           semester: semester,
         });
         if (careerDD !== undefined) {
-          const entrySecondCareerUserId = uuid();
+          const entrySecondCareerUserId = v4();
           await UserCareerModel.query().insert({
             id: entrySecondCareerUserId,
             id_user: newUserId,
@@ -107,18 +113,18 @@ export const createUser = async (req: Request, res: Response) => {
           });
         }
       }
-      res.json({
+      res.status(200).json({
         status: "OK",
         userId: newUserId,
       });
     } else {
-      res.json({
-        status: "Bad request",
+      res.status(400).json({
+        reason: 1,
         msg: "Email already exists",
       });
     }
   } catch (error) {
     console.log("ERROR AL CREAR USUARIO: ", error);
-    res.send(error);
+    res.status(500).send(error);
   }
 };

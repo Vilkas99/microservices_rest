@@ -26,6 +26,7 @@ export async function sendEmail(
       subject: subject, // Asunto del correo
       html: body, // Cuerpo del HTML
     });
+    console.log("Se envió un correo a", emailTo);
   } catch (error) {
     return console.log("El correo no fue enviado");
   }

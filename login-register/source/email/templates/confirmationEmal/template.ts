@@ -609,10 +609,10 @@ export const verificationEmailForUser = (
                                             font-size: 16px;
                                             line-height: 20.8px;
                                           "
-                                          >Hola, &lt;${userName.slice(
+                                          >Hola, ${userName.slice(
                                             0,
                                             userName.indexOf(" ")
-                                          )}&gt;<br /></span
+                                          )}<br /></span
                                       ></strong>
                                     </p>
                                     <p style="font-size: 14px; line-height: 130%">
