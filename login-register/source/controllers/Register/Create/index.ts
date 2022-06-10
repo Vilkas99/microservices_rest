@@ -83,17 +83,6 @@ export const createUser = async (req: Request, res: Response) => {
         status: EVerificationStatus.PENDING,
       });
 
-      // Send verification email
-      sendEmail(
-        email,
-        "Confirma tu cuenta de PAE",
-        verificationEmailForUser(
-          name,
-          `http://localhost:3000/verififyEmail/${confirmationToken}`,
-          `http://localhost:3000/verififyEmail/${confirmationToken}/cancel`
-        )
-      );
-
       //Insert user data in careers table if type is advisor or student
       if (EType.root !== type) {
         const entryCareerUserId = v4();
@@ -117,6 +106,16 @@ export const createUser = async (req: Request, res: Response) => {
         status: "OK",
         userId: newUserId,
       });
+      // Send verification email
+      sendEmail(
+        email,
+        "Confirma tu cuenta de PAE",
+        verificationEmailForUser(
+          name,
+          `http://localhost:3000/verififyEmail/${confirmationToken}`,
+          `http://localhost:3000/verififyEmail/${confirmationToken}/cancel`
+        )
+      );
     } else {
       res.status(400).json({
         reason: 1,

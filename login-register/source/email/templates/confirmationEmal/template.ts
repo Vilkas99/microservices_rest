@@ -1,7 +1,3 @@
-import * as fs from "fs";
-import { promisify } from "util";
-const readFile = promisify(fs.readFile);
-
 export const verificationEmailForUser = (
   userName: string,
   confirmRegisterLink: string,
@@ -386,7 +382,7 @@ export const verificationEmailForUser = (
                                     "
                                   >
                                     <strong
-                                      >&iexcl;Bienvenido a PAE!<br
+                                      >&iexcl;Bienvenidx a PAE!<br
                                     /></strong>
                                   </h1>
                                 </td>

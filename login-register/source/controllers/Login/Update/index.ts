@@ -14,26 +14,33 @@ enum EUserStatus {
 
 export const updateVerification = async (req: Request, res: Response) => {
   try {
-    const { token } = req.body;
+    const { token, cancel } = req.body;
 
-    if (token != undefined) {
+    if (token != undefined && cancel != undefined) {
       const success = await db("emailVerifications")
         .where("token", token.toString())
         .andWhere({ status: EVerificationStatus.PENDING })
         .select("id", "id_user");
       if (success && success.length === 1) {
-        await db("users")
-          .where("id", success[0].id_user)
-          .update({ status: EUserStatus.ACTIVE });
-        await db("emailVerifications")
-          .where("id", success[0].id)
-          .update({ status: EVerificationStatus.VERIFIED });
-        res.status(200).send("Email verified successfully");
+        if (cancel) {
+          // TODO: descomentar estas dos líneas cuando todos los on cascade realacionados a users queden implementados
+          //await db("users").where("id", success[0].id_user).delete();
+          //await db("emailVerifications").where("id", success[0].id).delete();
+          res.status(200).send("Registration cancelled successfully");
+        } else {
+          await db("users")
+            .where("id", success[0].id_user)
+            .update({ status: EUserStatus.ACTIVE });
+          await db("emailVerifications")
+            .where("id", success[0].id)
+            .update({ status: EVerificationStatus.VERIFIED });
+          res.status(200).send("Email verified successfully");
+        }
       } else {
-        res.status(400).send("Error. Invalid token");
+        res.status(404).send("Error. Invalid token");
       }
     } else {
-      res.status(400).send("Error. No token provided");
+      res.status(400).send("Error. Incomplete request.");
     }
   } catch (error) {
     console.log(error);

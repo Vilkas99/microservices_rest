@@ -3,7 +3,8 @@ import { Request, Response, NextFunction } from "express";
 import { v4 as uuidv4 } from "uuid";
 import db from "../../../db/db";
 import { ENotificationType } from "../../../utils/enums";
-import parse from "date-fns/parse";
+import { newAppointmentEmailForAdmin } from "../../../email/Templates/New Appointment - Admin/template";
+import { sendEmail } from "../../../email";
 
 export const createController = async (
   req: Request,
@@ -29,9 +30,18 @@ export const createController = async (
       res.status(400);
       throw "Cannot schedule an appointment on weekends";
     }
+    const dateString = dateObject.toLocaleString("es-MX", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      timeZone: "America/Mexico_City",
+    });
     await db("appointments").insert({
       id: newAppointmentId,
-      date: new Date(Date.parse(date)),
+      date: dateObject,
       status: EStatusAppointment.PENDING,
       location: "",
       id_subject: idSubject,
@@ -40,7 +50,9 @@ export const createController = async (
     });
 
     try {
-      const idAdmin = await db("users").first("id").where("type", "admin");
+      const idAdmin = await db("users")
+        .first("id", "email", "name")
+        .where("type", "admin");
 
       await db("appointments-user").insert({
         id: uuidv4(),
@@ -49,6 +61,11 @@ export const createController = async (
         id_advisor: null,
         id_admin: idAdmin["id"],
       });
+
+      const candidates = await db("appointment-advisorCandidates")
+        .select("id_appointment")
+        .where("id_appointment", newAppointmentId);
+      const subject = await db("subjects").first("name").where("id", idSubject);
 
       await axios
         .post("http://localhost:6090/notification/", {
@@ -60,6 +77,25 @@ export const createController = async (
         })
         .then((res) => console.log("Notification Created"))
         .catch((er) => console.error(er));
+      res.status(200).json({ newAppointmentId: newAppointmentId });
+
+      //Envío de emails a quienes corresponde
+
+      // Para el admin
+      sendEmail(
+        "A01733922@tec.mx",
+        "Hay una nueva solicitud de asesoría",
+        newAppointmentEmailForAdmin(
+          idAdmin["name"],
+          subject["name"],
+          dateString[0].toUpperCase() + dateString.substring(1),
+          candidates.length,
+          "localhost:3000/dashboard"
+        )
+      );
+
+      // Para los candidatos
+      //const advisors = await db("")
     } catch (error) {
       errorInAppointmentsUser = error;
       console.error(error);
@@ -68,7 +104,6 @@ export const createController = async (
       res.status(500);
       throw errorInAppointmentsUser;
     }
-    res.status(200).json({ newAppointmentId: newAppointmentId });
   } catch (error) {
     res.send(error);
     console.error(error);
