@@ -92,7 +92,12 @@ export const getCareerSubjectsController = async (
     }
 
     const careerSubjects: any = await SubjectModel.query()
-      .select("subjects.acronym", "subjects.name", "career-subject.semester")
+      .select(
+        "career-subject.id",
+        "subjects.acronym",
+        "subjects.name",
+        "career-subject.semester"
+      )
       .from("career-subject")
       .innerJoin("subjects", "career-subject.id_subject", "subjects.id")
       .where("career-subject.id_career", idCareer)
