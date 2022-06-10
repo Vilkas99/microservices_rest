@@ -24,19 +24,26 @@ interface ICareerDataToUpdate {
   updated_at: Date;
 }
 interface IUserData {
-  id: string;
-  career: string;
+  idUser: string;
+  idUserCareer?: string;
   dataToUpdate: IUserDataToUpdate;
-  careerDataToUpdate: ICareerDataToUpdate;
+  careerDataToUpdate?: ICareerDataToUpdate;
 }
 
 export const updateUser = async (req: Request, res: Response) => {
   try {
-    const { id, dataToUpdate, careerDataToUpdate }: IUserData = req.body;
-    await UserModel.query().findById(id).patch(dataToUpdate);
-    await UserCareerModel.query()
-      .patch(careerDataToUpdate)
-      .where("id_user", id);
+    const {
+      idUser,
+      idUserCareer,
+      dataToUpdate,
+      careerDataToUpdate,
+    }: IUserData = req.body;
+    await UserModel.query().findById(idUser).patch(dataToUpdate);
+    if (careerDataToUpdate !== undefined) {
+      await UserCareerModel.query()
+        .findById(idUserCareer)
+        .patch(careerDataToUpdate);
+    }
     res.json({
       status: "OK",
       msg: "User data has been updated",

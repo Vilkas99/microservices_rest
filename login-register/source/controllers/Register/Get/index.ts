@@ -19,15 +19,35 @@ export const getUserData = async (req: Request, res: Response) => {
           userData = await UserModel.query()
             .select("id", "status", "name", "email", "type", "configuration")
             .findById(id)
-            .withGraphFetched("career")
-            .withGraphFetched("userSemesters")
+            .withGraphFetched("userSemesters(orderByCreated)")
+            .modifiers({
+              orderByCreated(builder: any) {
+                builder.orderBy("created_at");
+              },
+            })
+            .withGraphFetched("career(orderByDD)")
+            .modifiers({
+              orderByDD(builder: any) {
+                builder.orderBy("doubleDegree");
+              },
+            })
             .withGraphFetched("schedules");
         } else if (userType[0].type !== "root") {
           userData = await UserModel.query()
             .select("id", "status", "name", "email", "type", "configuration")
             .findById(id)
-            .withGraphFetched("career")
-            .withGraphFetched("userSemesters");
+            .withGraphFetched("userSemesters(orderByCreated)")
+            .modifiers({
+              orderByCreated(builder: any) {
+                builder.orderBy("created_at");
+              },
+            })
+            .withGraphFetched("career(orderByDD)")
+            .modifiers({
+              orderByDD(builder: any) {
+                builder.orderBy("doubleDegree");
+              },
+            });
         } else {
           userData = await UserModel.query()
             .select("id", "status", "name", "email", "type", "configuration")
