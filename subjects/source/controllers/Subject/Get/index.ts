@@ -35,26 +35,39 @@ export const getSubjectCareerController = async (
     return;
   }
 
-  let off = 0;
-  let p = 0;
-
-  if (page && limitItems) {
-    p = +page;
-    if (p < 1) {
-      res.status(404).send("Error: Index page incorrect.");
-      return;
-    } else {
-      off = (+page - 1) * +limitItems;
-    }
-  } else {
-    res.status(404).send("Error: page and limitItems should not be 0.");
+  if (!limitItems) {
+    res.status(404).send("Error: itemsLimit should not be 0.");
     return;
   }
 
   try {
+    const numberSubjectCareers: any = await SubjectModel.query()
+      .count("career-subject.id")
+      .from("career-subject")
+      .innerJoin("subjects", "career-subject.id_subject", "subjects.id")
+      .where("career-subject.id_career", idCarrera);
+
+    const lastPage = numberSubjectCareers[0].count / +limitItems;
+
+    let off = 0;
+    let p = 0;
+
+    if (page && limitItems) {
+      p = +page;
+      if (p < 1 || p > lastPage) {
+        res.status(404).send("Error: Index page incorrect.");
+        return;
+      } else {
+        off = (+page - 1) * +limitItems;
+      }
+    } else {
+      res.status(404).send("Error: page and limitItems should not be 0.");
+      return;
+    }
+
     const subjectCareer: any = await SubjectModel.query()
       .select(
-        "subjects.id",
+        "career-subject.id",
         "subjects.acronym",
         "subjects.name",
         "career-subject.semester"
@@ -70,7 +83,7 @@ export const getSubjectCareerController = async (
       return;
     }
 
-    res.json(subjectCareer);
+    res.json({ subjects: subjectCareer, lastPage: Math.ceil(lastPage) });
     res.statusCode = 200;
   } catch (error) {
     res.status(500).send(error);
