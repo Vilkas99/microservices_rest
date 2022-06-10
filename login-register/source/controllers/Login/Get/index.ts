@@ -14,18 +14,27 @@ export const getUserLogin = async (req: Request, res: Response) => {
         msg: "Email not found",
       });
     } else {
-      const passwordValid = await curUser.verifyPassword(password);
+      if (curUser.status === "ACTIVE") {
+        const passwordValid = await curUser.verifyPassword(password);
 
-      if (passwordValid) {
-        console.log("Usuario actual: ", curUser.id);
-        res.json({
-          status: "OK",
-          userId: curUser.id,
-        });
+        if (passwordValid) {
+          console.log("Usuario actual: ", curUser.id);
+          res.json({
+            status: "OK",
+            userId: curUser.id,
+          });
+        } else {
+          res.status(400).json({
+            status: "Bad request",
+            reason: 0,
+            msg: "Wrong password",
+          });
+        }
       } else {
-        res.json({
+        res.status(400).json({
           status: "Bad request",
-          msg: "Wrong password",
+          reason: 1,
+          msg: "Given email is not active",
         });
       }
     }

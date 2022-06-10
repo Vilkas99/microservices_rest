@@ -1,13 +1,14 @@
 /** source/server.ts */
 import http from "http";
 import express, { Express } from "express";
-
+import cron from "node-cron";
 //Databes
 import db from "./db/db";
 import { Model } from "objection";
 
 //Functions
 import { errorHandler } from "./utils/functions";
+import { markAppointmentsAsCompleted } from "./tasks";
 
 //Enviroment dotenv
 require("dotenv").config();
@@ -16,6 +17,13 @@ require("dotenv").config();
 Model.knex(db);
 
 var cors = require("cors");
+
+// Tasks
+cron.schedule("0 */1 * * *", () => {
+  markAppointmentsAsCompleted().then((res) => {
+    console.log(res);
+  });
+});
 
 //Routes
 const example_routes = require("./routes/Example");

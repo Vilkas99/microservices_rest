@@ -58,7 +58,7 @@ export const getQuestionController = async (req: Request, res: Response) => {
 
   try {
     const questionsPoll: any = await QuestionModel.query()
-      .select("title as question", "type")
+      .select("order", "title as question", "type")
       .from("questions")
       .where("survey_type", id_type?.toString())
       .orderBy("order", "asc");
