@@ -1,6 +1,4 @@
-import axios from "axios";
 import { Request, Response } from "express";
-import { ENotificationType } from "../enums";
 import db from "../../db/db";
 
 const {
@@ -117,24 +115,6 @@ export function errorHandler(err: any, res: Response) {
     });
   }
 }
-
-export const createNotification = async (
-  title: string,
-  description: string,
-  receiverID: string,
-  type: ENotificationType
-) => {
-  await axios
-    .post("http://localhost:6090/notification/", {
-      //TODO: Reemplazar por una variable env
-      title,
-      description,
-      idUser: receiverID, //TODO: Reemplazar con una variable de entorno (O mejor aun, hacer una consulta a la tabla de users, y seleccionar un admin al azar)
-      type,
-    })
-    .then((res) => console.log("Notification Created"))
-    .catch((er) => console.error(er));
-};
 
 //////////////////////////GENERALES/////////////////////////
 
