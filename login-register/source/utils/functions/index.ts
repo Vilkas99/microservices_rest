@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import db from "../../db/db";
-import redisClient from "../../redis";
 
 const {
   ValidationError,
@@ -129,13 +128,6 @@ export const paramNotPresent = (
     return true;
   }
   return false;
-};
-
-export const createEntryRedis = (key: string, value: string) => {
-  redisClient.set(key, value, (err: any, reply: any) => {
-    if (err) throw err;
-    console.log(reply);
-  });
 };
 
 export const isString = (x: any) => {
