@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { email } from "../../../email/index";
+import { sendEmail } from "../../../email/index";
 import db from "../../../db/db";
 
 const AppointmentModel = require("../../../models/Appointment");
@@ -41,7 +41,7 @@ interface IIdsAppointmentDataMod {
 */
 
 export const email2 = async (req: Request, res: Response) => {
-  email(
+  sendEmail(
     "a01733922@tec.mx",
     "Pruebita",
     "<h1>PAE</h1><h2>Recuperar contraseña</h2>"
