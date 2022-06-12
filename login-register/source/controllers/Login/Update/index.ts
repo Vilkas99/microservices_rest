@@ -21,11 +21,17 @@ export const updateVerification = async (req: Request, res: Response) => {
         .where("token", token.toString())
         .andWhere({ status: EVerificationStatus.PENDING })
         .select("id", "id_user");
+      console.log("se pidió cancelar?", cancel);
       if (success && success.length === 1) {
         if (cancel) {
           // TODO: descomentar estas dos líneas cuando todos los on cascade realacionados a users queden implementados
-          //await db("users").where("id", success[0].id_user).delete();
-          //await db("emailVerifications").where("id", success[0].id).delete();
+          await db("emailVerifications")
+            .where("id_user", success[0].id_user)
+            .delete();
+          await db("users-career")
+            .where("id_user", success[0].id_user)
+            .delete();
+          await db("users").where("id", success[0].id_user).delete();
           res.status(200).send("Registration cancelled successfully");
         } else {
           await db("users")
