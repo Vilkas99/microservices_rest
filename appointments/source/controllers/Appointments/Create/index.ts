@@ -3,7 +3,8 @@ import { Request, Response, NextFunction } from "express";
 import { v4 as uuidv4 } from "uuid";
 import db from "../../../db/db";
 import { ENotificationType } from "../../../utils/enums";
-import { newAppointmentEmailForAdmin } from "../../../email/Templates/New Appointment - Admin/template";
+import { newAppointmentEmailForAdmin } from "../../../email/Templates/New Appointment/Admin/template";
+import { newAppointmentEmailForAdvisor } from "../../../email/Templates/New Appointment/Advisor/template";
 import { sendEmail } from "../../../email";
 
 export const createController = async (
@@ -63,7 +64,13 @@ export const createController = async (
       });
 
       const candidates = await db("appointment-advisorCandidates")
-        .select("id_appointment")
+        .join(
+          "users",
+          "appointment-advisorCandidates.id_advisor",
+          "=",
+          "users.id"
+        )
+        .select("users.email", "users.name")
         .where("id_appointment", newAppointmentId);
       const subject = await db("subjects").first("name").where("id", idSubject);
 
@@ -79,23 +86,34 @@ export const createController = async (
         .catch((er) => console.error(er));
       res.status(200).json({ newAppointmentId: newAppointmentId });
 
-      //Envío de emails a quienes corresponde
+      /*******Envío de emails a quienes corresponde*******/
 
       // Para el admin
       sendEmail(
-        "A01733922@tec.mx",
+        idAdmin["id"],
         "Hay una nueva solicitud de asesoría",
         newAppointmentEmailForAdmin(
           idAdmin["name"],
           subject["name"],
-          dateString[0].toUpperCase() + dateString.substring(1),
+          dateString,
           candidates.length,
           "localhost:3000/dashboard"
         )
       );
 
       // Para los candidatos
-      //const advisors = await db("")
+      for (const candidate of candidates) {
+        sendEmail(
+          candidate["email"],
+          "Calificas para dar una asesoría. Confírmala o recházala.",
+          newAppointmentEmailForAdvisor(
+            candidate["name"],
+            subject["name"],
+            dateString,
+            "localhost:3000/dashboard"
+          )
+        );
+      }
     } catch (error) {
       errorInAppointmentsUser = error;
       console.error(error);

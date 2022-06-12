@@ -20,9 +20,13 @@ var cors = require("cors");
 
 // Tasks
 cron.schedule("0 */1 * * *", () => {
-  markAppointmentsAsCompleted().then((res) => {
-    console.log(res);
-  });
+  markAppointmentsAsCompleted()
+    .then((res) => {
+      console.log(`Caducaron ${res} asesorías`);
+    })
+    .catch((error) => {
+      console.log("Falló el deamon markAppointmentsAsCompleted", error);
+    });
 });
 
 //Routes
