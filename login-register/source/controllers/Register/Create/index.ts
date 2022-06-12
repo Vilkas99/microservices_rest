@@ -108,7 +108,7 @@ export const createUser = async (req: Request, res: Response) => {
       });
       // Send verification email
       sendEmail(
-        email,
+        "alicorniouziel@gmail.com",
         "Confirma tu cuenta de PAE",
         verificationEmailForUser(
           name,
