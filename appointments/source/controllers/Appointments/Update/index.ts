@@ -2,6 +2,7 @@ import { eachHourOfInterval } from "date-fns";
 import { Request, Response, NextFunction } from "express";
 import db from "../../../db/db";
 import { sendEmail } from "../../../email";
+import { appointmentCancelledEmail } from "../../../email/Templates/Appointment cancelled/template";
 import { confirmedAppointmentEmailForAdvisor } from "../../../email/Templates/Appointment confirmed/Advisor/template";
 import { ENotificationType } from "../../../utils/enums";
 import { createNotification } from "../../../utils/functions";
@@ -53,15 +54,25 @@ const notificationForStudent = async (
   const subjectName = (
     await db("subjects").first("name").where("id", baseChanges.id_subject)
   )["name"];
+  const dateString = baseChanges.date?.toLocaleString("es-MX", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "America/Mexico_City",
+  });
   const studentInfo = await db("users")
     .first("email", "name")
     .where("id", baseChanges.id_subject);
   if (baseChanges.status === EStatus.ACCEPTED) {
+    /*
     sendEmail(
       studentInfo["email"],
       "¡Tu petición deasesoría fue aceptada!",
-      send
-    );
+      confirmedAppointmentEmailForAdvisor()
+    );*/
     createNotification(
       "Asesoría aceptada",
       "Tienes una Asesoría Aceptada",
@@ -69,6 +80,12 @@ const notificationForStudent = async (
       ENotificationType.APPOINTMENT_ACCEPTED
     );
   } else if (baseChanges.status === EStatus.CANCELED) {
+    /*
+    sendEmail(
+      studentInfo["email"],
+      "¡Tu petición deasesoría fue aceptada!",
+      appointmentCancelledEmail()
+    );*/
     createNotification(
       "Asesoría rechazada",
       "Tu solicitud ha sido rechazada",

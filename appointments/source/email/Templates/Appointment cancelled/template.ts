@@ -1,9 +1,4 @@
-export const confirmedAppointmentEmailForAdvisor = (
-  advisorName: string,
-  subject: string,
-  date: string | undefined,
-  where: string | undefined
-) => {
+export const appointmentCancelledEmail = (date: string, subject: string) => {
   return `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
     <html
       xmlns="http://www.w3.org/1999/xhtml"
@@ -382,7 +377,7 @@ export const confirmedAppointmentEmailForAdvisor = (
                                       "
                                     >
                                       <strong
-                                        >Haz sido asignadx para impartir una asesor&iacute;a<br
+                                        >Asesor&iacute;a cancelada<br
                                       /></strong>
                                     </h1>
                                   </td>
@@ -496,7 +491,7 @@ export const confirmedAppointmentEmailForAdvisor = (
                                           <img
                                             align="center"
                                             border="0"
-                                            src="https://firebasestorage.googleapis.com/v0/b/pae-files-bucket/o/business-deal-3597247-3010227.png?alt=media&token=a9e93eee-0578-47c3-8340-c5e7a0b07f60"
+                                            src="https://firebasestorage.googleapis.com/v0/b/pae-files-bucket/o/appcancelled-min.png?alt=media&token=46ab0284-9e4a-4d48-b8d5-2ee3bb45f81e"
                                             alt="Hero Image"
                                             title="Hero Image"
                                             style="
@@ -631,10 +626,7 @@ export const confirmedAppointmentEmailForAdvisor = (
                                                 line-height: 34.2px;
                                                 font-size: 18px;
                                               "
-                                              >Hola ${advisorName.slice(
-                                                0,
-                                                advisorName.indexOf(" ")
-                                              )},</span
+                                              >Hola NOMBRE,</span
                                             ></strong
                                           ></span
                                         >
@@ -645,14 +637,11 @@ export const confirmedAppointmentEmailForAdvisor = (
                                             font-size: 16px;
                                             line-height: 30.4px;
                                           "
-                                          >Fuiste seleccionado para dar una asesor&iacute;a de ${subject} a <b>NOMBREASESORADO</b>.
-                                          Por favor, preséntate en <b>${
-                                            where ? where : "(por definir)"
-                                          }</b> el <b>${
-    date ? date[0].toUpperCase() + date.substring(1) : "(por definir)"
-  }</b> para apoyarle con sus dudas.
-                                          <br
-                                        /></span>
+                                          >Tu asesor&iacute;a programada para el <b>${
+                                            date[0].toUpperCase() +
+                                            date.substring(1)
+                                          }</b> de la materia <b>${subject}</b> fue cancelada. Lamentamos los inconvenientes que esto pueda causar. Para preguntas y aclaraciones, por favor escríbenos a pae.pue@itesm.mx
+                                        <br/></span>
                                       </p>
                                     </div>
                                   </td>
@@ -740,7 +729,18 @@ export const confirmedAppointmentEmailForAdvisor = (
                             >
                               <tbody>
                                 <tr>
+                                  <td
+                                    class="v-container-padding-padding"
+                                    style="
+                                      overflow-wrap: break-word;
+                                      word-break: break-word;
+                                      padding: 15px 10px 30px;
+                                      font-family: 'Montserrat', sans-serif;
+                                    "
+                                    align="left"
+                                  >
     
+                                  </td>
                                 </tr>
                               </tbody>
                             </table>

@@ -1,8 +1,7 @@
-export const confirmedAppointmentEmailForAdvisor = (
-  advisorName: string,
+export const appointmentCompletedEmailForStudent = (
+  studentName: string,
   subject: string,
-  date: string | undefined,
-  where: string | undefined
+  linkToDashboard: string
 ) => {
   return `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
     <html
@@ -382,7 +381,7 @@ export const confirmedAppointmentEmailForAdvisor = (
                                       "
                                     >
                                       <strong
-                                        >Haz sido asignadx para impartir una asesor&iacute;a<br
+                                        >&iexcl;Asesor&iacute;a completada!<br
                                       /></strong>
                                     </h1>
                                   </td>
@@ -496,7 +495,7 @@ export const confirmedAppointmentEmailForAdvisor = (
                                           <img
                                             align="center"
                                             border="0"
-                                            src="https://firebasestorage.googleapis.com/v0/b/pae-files-bucket/o/business-deal-3597247-3010227.png?alt=media&token=a9e93eee-0578-47c3-8340-c5e7a0b07f60"
+                                            src="https://firebasestorage.googleapis.com/v0/b/pae-files-bucket/o/Confirmed-min.png?alt=media&token=72d7ca7e-7007-4c8c-97a8-5ccec484ec45"
                                             alt="Hero Image"
                                             title="Hero Image"
                                             style="
@@ -631,9 +630,9 @@ export const confirmedAppointmentEmailForAdvisor = (
                                                 line-height: 34.2px;
                                                 font-size: 18px;
                                               "
-                                              >Hola ${advisorName.slice(
+                                              >Hola  ${studentName.slice(
                                                 0,
-                                                advisorName.indexOf(" ")
+                                                studentName.indexOf(" ")
                                               )},</span
                                             ></strong
                                           ></span
@@ -645,14 +644,12 @@ export const confirmedAppointmentEmailForAdvisor = (
                                             font-size: 16px;
                                             line-height: 30.4px;
                                           "
-                                          >Fuiste seleccionado para dar una asesor&iacute;a de ${subject} a <b>NOMBREASESORADO</b>.
-                                          Por favor, preséntate en <b>${
-                                            where ? where : "(por definir)"
-                                          }</b> el <b>${
-    date ? date[0].toUpperCase() + date.substring(1) : "(por definir)"
-  }</b> para apoyarle con sus dudas.
-                                          <br
-                                        /></span>
+                                          >Tuviste recientemente una asesor&iacute;a
+                                          de ${subject}. Esperamos que te haya ayudado
+                                          a aclarar tus dudas y que lo que
+                                          aprendiste te sirva de ahora en
+                                          adelante.<br
+                                        /><br/>Te pedimos contestes una breve encuesta para que continuemos mejorando para ti. ¡Gracias por confiar en PAE!</span>
                                       </p>
                                     </div>
                                   </td>
@@ -740,7 +737,67 @@ export const confirmedAppointmentEmailForAdvisor = (
                             >
                               <tbody>
                                 <tr>
-    
+                                  <td
+                                    class="v-container-padding-padding"
+                                    style="
+                                      overflow-wrap: break-word;
+                                      word-break: break-word;
+                                      padding: 15px 10px 30px;
+                                      font-family: 'Montserrat', sans-serif;
+                                    "
+                                    align="left"
+                                  >
+                                    <div align="center">
+                                      <!--[if mso]><table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-spacing: 0; border-collapse: collapse; mso-table-lspace:0pt; mso-table-rspace:0pt;font-family:'Montserrat',sans-serif;"><tr><td style="font-family:'Montserrat',sans-serif;" align="center"><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${linkToDashboard}" style="height:49px; v-text-anchor:middle; width:154px;" arcsize="51%" stroke="f" fillcolor="#4cc9f0"><w:anchorlock/><center style="color:#FFFFFF;font-family:'Montserrat',sans-serif;"><![endif]-->
+                                      <a
+                                        href="LINK"
+                                        target="_blank"
+                                        style="
+                                          box-sizing: border-box;
+                                          display: inline-block;
+                                          font-family: 'Montserrat', sans-serif;
+                                          text-decoration: none;
+                                          -webkit-text-size-adjust: none;
+                                          text-align: center;
+                                          color: #ffffff;
+                                          background-color: #4cc9f0;
+                                          border-radius: 25px;
+                                          -webkit-border-radius: 25px;
+                                          -moz-border-radius: 25px;
+                                          width: auto;
+                                          max-width: 100%;
+                                          overflow-wrap: break-word;
+                                          word-break: break-word;
+                                          word-wrap: break-word;
+                                          mso-border-alt: none;
+                                        "
+                                      >
+                                        <span
+                                          style="
+                                            display: block;
+                                            padding: 16px 50px;
+                                            line-height: 120%;
+                                          "
+                                          ><span
+                                            style="
+                                              font-size: 18px;
+                                              line-height: 21.6px;
+                                            "
+                                            ><strong
+                                              ><span
+                                                style="
+                                                  line-height: 21.6px;
+                                                  font-size: 18px;
+                                                "
+                                                >Ir a la encuesta</span
+                                              ></strong
+                                            ></span
+                                          ></span
+                                        >
+                                      </a>
+                                      <!--[if mso]></center></v:roundrect></td></tr></table><![endif]-->
+                                    </div>
+                                  </td>
                                 </tr>
                               </tbody>
                             </table>
