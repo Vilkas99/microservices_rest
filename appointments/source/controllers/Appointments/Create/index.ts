@@ -68,13 +68,16 @@ export const createController = async (
       const subject = await db("subjects").first("name").where("id", idSubject);
 
       await axios
-        .post("http://localhost:6090/notification/", {
-          //TODO: Reemplazar por una variable env
-          title: "Solicitud de Asesoría",
-          description: "Una nueva asesoría se ha solicitado",
-          idUser: idAdmin["id"],
-          type: ENotificationType.NEW_REQUEST,
-        })
+        .post(
+          "https://dashboard.yellowplant-d0967952.westus.azurecontainerapps.io:6090/notification/",
+          {
+            //TODO: Reemplazar por una variable env
+            title: "Solicitud de Asesoría",
+            description: "Una nueva asesoría se ha solicitado",
+            idUser: idAdmin["id"],
+            type: ENotificationType.NEW_REQUEST,
+          }
+        )
         .then((res) => console.log("Notification Created"))
         .catch((er) => console.error(er));
       res.status(200).json({ newAppointmentId: newAppointmentId });
@@ -90,7 +93,7 @@ export const createController = async (
           subject["name"],
           dateString[0].toUpperCase() + dateString.substring(1),
           candidates.length,
-          "localhost:3000/dashboard"
+          "http://www.paepue.com/dashboard"
         )
       );
 

@@ -125,13 +125,16 @@ export const createNotification = async (
   type: ENotificationType
 ) => {
   await axios
-    .post("http://localhost:6090/notification/", {
-      //TODO: Reemplazar por una variable env
-      title,
-      description,
-      idUser: receiverID, //TODO: Reemplazar con una variable de entorno (O mejor aun, hacer una consulta a la tabla de users, y seleccionar un admin al azar)
-      type,
-    })
+    .post(
+      "https://dashboard.yellowplant-d0967952.westus.azurecontainerapps.io:6090/notification/",
+      {
+        //TODO: Reemplazar por una variable env
+        title,
+        description,
+        idUser: receiverID, //TODO: Reemplazar con una variable de entorno (O mejor aun, hacer una consulta a la tabla de users, y seleccionar un admin al azar)
+        type,
+      }
+    )
     .then((res) => console.log("Notification Created"))
     .catch((er) => console.error(er));
 };

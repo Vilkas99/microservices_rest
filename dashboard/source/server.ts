@@ -25,7 +25,7 @@ const router: Express = express();
 const httpServer = http.createServer(router);
 const io = new WebSocketServer(httpServer, {
   cors: {
-    origin: "http://localhost:3000", //TODO: Modificar por la URL de despliegue del front
+    origin: "http://www.paepue.com", //TODO: Modificar por la URL de despliegue del front
   },
 });
 exports.io = io;

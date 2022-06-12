@@ -112,8 +112,8 @@ export const createUser = async (req: Request, res: Response) => {
         "Confirma tu cuenta de PAE",
         verificationEmailForUser(
           name,
-          `http://localhost:3000/verififyEmail/${confirmationToken}`,
-          `http://localhost:3000/verififyEmail/${confirmationToken}/cancel`
+          `http://www.paepue.com/verififyEmail/${confirmationToken}`,
+          `http://www.paepue.com/verififyEmail/${confirmationToken}/cancel`
         )
       );
     } else {
