@@ -638,7 +638,7 @@ export const verificationEmailForUser = (
                                             "
                                             ><a
                                               rel="noopener"
-                                              href=${confirmRegisterLink}
+                                              href="${confirmRegisterLink}"
                                               target="_blank"
                                               style="
                                                 color: #9b6cff;
@@ -782,7 +782,7 @@ export const verificationEmailForUser = (
                                         cre&oacute; la cuenta, da click
                                         <a
                                           rel="noopener"
-                                          href=${cancelRegisterLink}
+                                          href="${cancelRegisterLink}"
                                           target="_blank"
                                           style="
                                             color: #9b6cff;

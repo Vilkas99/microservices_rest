@@ -9,6 +9,7 @@ import { Model } from "objection";
 //Functions
 import { errorHandler } from "./utils/functions";
 import { markAppointmentsAsCompleted } from "./tasks";
+import { sendEmail } from "./email";
 
 //Enviroment dotenv
 require("dotenv").config();
@@ -20,9 +21,13 @@ var cors = require("cors");
 
 // Tasks
 cron.schedule("0 */1 * * *", () => {
-  markAppointmentsAsCompleted().then((res) => {
-    console.log(res);
-  });
+  markAppointmentsAsCompleted()
+    .then((res) => {
+      console.log(`Se completaron las siguientes asesorás: ${res}`);
+    })
+    .catch((error) => {
+      console.log("Falló el deamon markAppointmentsAsCompleted", error);
+    });
 });
 
 //Routes

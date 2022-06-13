@@ -1,8 +1,7 @@
-export const newAppointmentEmailForAdmin = (
-  adminName: string,
+export const newAppointmentEmailForAdvisor = (
+  advisorName: string,
   subject: string,
-  date: string | number,
-  howManyAdvisors: number,
+  date: string,
   linkToDashboard: string
 ) => {
   return `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -383,7 +382,7 @@ export const newAppointmentEmailForAdmin = (
                                     "
                                   >
                                     <strong
-                                      >Nueva sollicitud de asesor&iacute;a<br
+                                      >Calificas para dar una asesor&iacute;a<br
                                     /></strong>
                                   </h1>
                                 </td>
@@ -632,9 +631,9 @@ export const newAppointmentEmailForAdmin = (
                                               line-height: 34.2px;
                                               font-size: 18px;
                                             "
-                                            >Hola ${adminName.slice(
+                                            >Hola ${advisorName.slice(
                                               0,
-                                              adminName.indexOf(" ")
+                                              advisorName.indexOf(" ")
                                             )},</span
                                           ></strong
                                         ></span
@@ -670,7 +669,11 @@ export const newAppointmentEmailForAdmin = (
   
               <div
                 class="u-row-container"
-                style="padding: 0px; background-color: transparent"
+                style="
+                  padding: 0px;
+                  background-color: transparent;
+                  margin-bottom: -40px;
+                "
               >
                 <div
                   class="u-row"
@@ -803,7 +806,10 @@ export const newAppointmentEmailForAdmin = (
                                           font-size: 16px;
                                           line-height: 33.6px;
                                         "
-                                        >${date}<br
+                                        >${
+                                          date[0].toUpperCase() +
+                                          date.substring(1)
+                                        }<br
                                       /></span>
                                     </p>
                                   </div>
@@ -932,22 +938,6 @@ export const newAppointmentEmailForAdmin = (
                                           materia ${subject}<br
                                         /></span>
                                       </li>
-                                      <li
-                                        style="
-                                          font-size: 14px;
-                                          line-height: 25.2px;
-                                          text-align: left;
-                                        "
-                                      >
-                                        <span
-                                          style="
-                                            font-size: 16px;
-                                            line-height: 28.8px;
-                                          "
-                                          >Hay ${howManyAdvisors} asesor (es) capacitados para
-                                          dar la asesor&iacute;a</span
-                                        >
-                                      </li>
                                     </ul>
                                   </div>
                                 </td>
@@ -1050,6 +1040,31 @@ export const newAppointmentEmailForAdmin = (
                                       word-wrap: break-word;
                                     "
                                   >
+                                    <h4
+                                      class="v-font-size"
+                                      style="
+                                        margin: 0px;
+                                        color: #8865dc;
+                                        line-height: 140%;
+                                        text-align: center;
+                                        word-wrap: break-word;
+                                        font-weight: normal;
+                                        font-family: 'Montserrat', sans-serif;
+                                        font-size: 18px;
+                                      "
+                                    >
+                                      <strong>Descripci&oacute;n</strong>
+                                    </h4>
+                                  </div>
+                                  <div
+                                    style="
+                                      line-height: 140%;
+                                      text-align: left;
+                                      word-wrap: break-word;
+                                      margin-top: 1%;
+                                      margin-bottom: 5%;
+                                    "
+                                  >
                                     <p style="font-size: 14px; line-height: 140%">
                                       <span
                                         style="
@@ -1059,7 +1074,61 @@ export const newAppointmentEmailForAdmin = (
                                         "
                                         >Por favor atiende la solicitud lo
                                         m&aacute;s pronto posible. &iexcl;Gracias
-                                        por tu trabajo!<br
+                                        por tu trabajo!aaaaaaaaaaaaaaaaaaa dyv dvy
+                                        fduvf odyv uds cud ih su cd de sde lo pero
+                                        slo qeuersta pasando entre tu y y9o<br
+                                      /></span>
+                                    </p>
+                                  </div>
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+  
+                          <table
+                            style="font-family: 'Montserrat', sans-serif"
+                            role="presentation"
+                            cellpadding="0"
+                            cellspacing="0"
+                            width="100%"
+                            border="0"
+                          >
+                            <tbody>
+                              <tr>
+                                <td
+                                  class="v-container-padding-padding"
+                                  style="
+                                    overflow-wrap: break-word;
+                                    word-break: break-word;
+                                    padding: 10px 10px 10px 40px;
+                                    font-family: 'Montserrat', sans-serif;
+                                  "
+                                  align="left"
+                                >
+                                  <div
+                                    style="
+                                      line-height: 140%;
+                                      text-align: left;
+                                      word-wrap: break-word;
+                                    "
+                                  >
+                                    <p style="font-size: 14px; line-height: 140%">
+                                      <span
+                                        style="
+                                          color: #4b4a4a;
+                                          font-size: 14px;
+                                          line-height: 19.6px;
+                                        "
+                                      >
+                                        Fuiste seleccionado porque tus horarios de
+                                        disponibilidad coinciden con los de la
+                                        solicitud y por tu carrera puedes dar esta
+                                        materia. Si no te sientes cómodo con el
+                                        tema, puedes rechazar la asesoría.
+                                        <b
+                                          >Por favor responde a la solicitud lo
+                                          más pronto posible.</b
+                                        ><br
                                       /></span>
                                     </p>
                                   </div>
@@ -1089,9 +1158,9 @@ export const newAppointmentEmailForAdmin = (
                                   align="left"
                                 >
                                   <div align="center">
-                                    <!--[if mso]><table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-spacing: 0; border-collapse: collapse; mso-table-lspace:0pt; mso-table-rspace:0pt;font-family:'Montserrat',sans-serif;"><tr><td style="font-family:'Montserrat',sans-serif;" align="center"><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="LINK" style="height:49px; v-text-anchor:middle; width:154px;" arcsize="51%" stroke="f" fillcolor="#4cc9f0"><w:anchorlock/><center style="color:#FFFFFF;font-family:'Montserrat',sans-serif;"><![endif]-->
+                                    <!--[if mso]><table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-spacing: 0; border-collapse: collapse; mso-table-lspace:0pt; mso-table-rspace:0pt;font-family:'Montserrat',sans-serif;"><tr><td style="font-family:'Montserrat',sans-serif;" align="center"><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${linkToDashboard}" style="height:49px; v-text-anchor:middle; width:154px;" arcsize="51%" stroke="f" fillcolor="#4cc9f0"><w:anchorlock/><center style="color:#FFFFFF;font-family:'Montserrat',sans-serif;"><![endif]-->
                                     <a
-                                      href=${linkToDashboard}
+                                      href="${linkToDashboard}"
                                       target="_blank"
                                       style="
                                         box-sizing: border-box;
@@ -1523,5 +1592,6 @@ export const newAppointmentEmailForAdmin = (
       <!--[if IE]></div><![endif]-->
     </body>
   </html>
+  
   `;
 };

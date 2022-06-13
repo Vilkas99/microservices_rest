@@ -1,6 +1,10 @@
 import { eachHourOfInterval } from "date-fns";
 import { Request, Response, NextFunction } from "express";
 import db from "../../../db/db";
+import { sendEmail } from "../../../email";
+import { appointmentCancelledEmail } from "../../../email/Templates/Appointment cancelled/template";
+import { confirmedAppointmentEmailForAdvisor } from "../../../email/Templates/Appointment confirmed/Advisor/template";
+import { confirmedAppointmentEmailForStudent } from "../../../email/Templates/Appointment confirmed/Student/template";
 import { ENotificationType } from "../../../utils/enums";
 import { createNotification } from "../../../utils/functions";
 
@@ -44,11 +48,47 @@ interface IUpdateaCandidate {
   newState: ECandidateStatus;
 }
 
-const notificationForStudent = (
+const notificationForStudent = async (
   baseChanges: IBaseChanges,
-  idStudent: string
+  idStudent: string,
+  detailChanges: IIdsAppointmentDataMod
 ) => {
+  const subjectName = (
+    await db("subjects").first("name").where("id", baseChanges.id_subject)
+  )["name"];
+
+  const dateString = baseChanges.date?.toLocaleString("es-MX", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "America/Mexico_City",
+  });
+
+  const studentInfo = await db("users")
+    .first("email", "name")
+    .where("id", idStudent);
+
+  const advisorName = await db("users")
+    .first("name")
+    .where("id", detailChanges.id_advisor);
+
   if (baseChanges.status === EStatus.ACCEPTED) {
+    // Email for student
+
+    sendEmail(
+      studentInfo["email"],
+      "¡Tu petición deasesoría fue aceptada!",
+      confirmedAppointmentEmailForStudent(
+        studentInfo["name"],
+        advisorName["name"],
+        subjectName["name"],
+        dateString,
+        baseChanges.location
+      )
+    );
     createNotification(
       "Asesoría aceptada",
       "Tienes una Asesoría Aceptada",
@@ -56,6 +96,11 @@ const notificationForStudent = (
       ENotificationType.APPOINTMENT_ACCEPTED
     );
   } else if (baseChanges.status === EStatus.CANCELED) {
+    sendEmail(
+      studentInfo["email"],
+      "¡Tu petición deasesoría fue aceptada!",
+      appointmentCancelledEmail(dateString, subjectName)
+    );
     createNotification(
       "Asesoría rechazada",
       "Tu solicitud ha sido rechazada",
@@ -65,7 +110,10 @@ const notificationForStudent = (
   }
 };
 
-const notificationForUsers = (detailsChanges: IIdsAppointmentDataMod) => {
+const notificationForUsers = async (
+  baseChanges: IBaseChanges,
+  detailsChanges: IIdsAppointmentDataMod
+) => {
   for (const key in detailsChanges) {
     if (key === "id_advisor" && detailsChanges.id_advisor !== undefined) {
       createNotification(
@@ -73,6 +121,36 @@ const notificationForUsers = (detailsChanges: IIdsAppointmentDataMod) => {
         "Has sido asignado/a a una nueva asesoría",
         detailsChanges.id_advisor,
         ENotificationType.APPOINTMENT_ACCEPTED
+      );
+      const advisorInfo = (
+        await db("users")
+          .first("email", "name")
+          .where("id", detailsChanges.id_advisor)
+      )["email"];
+      const subjectName = (
+        await db("subjects").first("name").where("id", baseChanges.id_subject)
+      )["name"];
+
+      // Send email notification to the selected advisor
+      sendEmail(
+        advisorInfo["email"],
+        "Se te asignó una asesoría",
+        confirmedAppointmentEmailForAdvisor(
+          advisorInfo["name"],
+          subjectName,
+          baseChanges.date
+            ? baseChanges.date.toLocaleString("es-MX", {
+                weekday: "long",
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+                timeZone: "America/Mexico_City",
+              })
+            : undefined,
+          baseChanges.location ? baseChanges.location : undefined
+        )
       );
     } else if (key === "id_admin" && detailsChanges.id_admin !== undefined) {
       createNotification(
@@ -137,8 +215,8 @@ export const updateController = async (req: Request, res: Response) => {
   }
 
   try {
-    await notificationForStudent(baseChanges, idStudent);
-    await notificationForUsers(detailChanges);
+    await notificationForStudent(baseChanges, idStudent, detailChanges);
+    await notificationForUsers(baseChanges, detailChanges);
   } catch (error) {
     res.send(error);
     return;
