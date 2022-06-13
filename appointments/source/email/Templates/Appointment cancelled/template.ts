@@ -1,4 +1,7 @@
-export const appointmentCancelledEmail = (date: string, subject: string) => {
+export const appointmentCancelledEmail = (
+  date: string | undefined,
+  subject: string
+) => {
   return `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
     <html
       xmlns="http://www.w3.org/1999/xhtml"
@@ -638,8 +641,7 @@ export const appointmentCancelledEmail = (date: string, subject: string) => {
                                             line-height: 30.4px;
                                           "
                                           >Tu asesor&iacute;a programada para el <b>${
-                                            date[0].toUpperCase() +
-                                            date.substring(1)
+                                            date ? date : "(por definir)"
                                           }</b> de la materia <b>${subject}</b> fue cancelada. Lamentamos los inconvenientes que esto pueda causar. Para preguntas y aclaraciones, por favor escríbenos a pae.pue@itesm.mx
                                         <br/></span>
                                       </p>

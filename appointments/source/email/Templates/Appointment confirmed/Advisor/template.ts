@@ -649,7 +649,7 @@ export const confirmedAppointmentEmailForAdvisor = (
                                           Por favor, preséntate en <b>${
                                             where ? where : "(por definir)"
                                           }</b> el <b>${
-    date ? date[0].toUpperCase() + date.substring(1) : "(por definir)"
+    date ? date : "(por definir)"
   }</b> para apoyarle con sus dudas.
                                           <br
                                         /></span>

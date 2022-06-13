@@ -4,6 +4,7 @@ import db from "../../../db/db";
 import { sendEmail } from "../../../email";
 import { appointmentCancelledEmail } from "../../../email/Templates/Appointment cancelled/template";
 import { confirmedAppointmentEmailForAdvisor } from "../../../email/Templates/Appointment confirmed/Advisor/template";
+import { confirmedAppointmentEmailForStudent } from "../../../email/Templates/Appointment confirmed/Student/template";
 import { ENotificationType } from "../../../utils/enums";
 import { createNotification } from "../../../utils/functions";
 
@@ -49,11 +50,13 @@ interface IUpdateaCandidate {
 
 const notificationForStudent = async (
   baseChanges: IBaseChanges,
-  idStudent: string
+  idStudent: string,
+  detailChanges: IIdsAppointmentDataMod
 ) => {
   const subjectName = (
     await db("subjects").first("name").where("id", baseChanges.id_subject)
   )["name"];
+
   const dateString = baseChanges.date?.toLocaleString("es-MX", {
     weekday: "long",
     year: "numeric",
@@ -63,16 +66,29 @@ const notificationForStudent = async (
     minute: "2-digit",
     timeZone: "America/Mexico_City",
   });
+
   const studentInfo = await db("users")
     .first("email", "name")
-    .where("id", baseChanges.id_subject);
+    .where("id", idStudent);
+
+  const advisorName = await db("users")
+    .first("name")
+    .where("id", detailChanges.id_advisor);
+
   if (baseChanges.status === EStatus.ACCEPTED) {
-    /*
+    // Email for student
+
     sendEmail(
       studentInfo["email"],
       "¡Tu petición deasesoría fue aceptada!",
-      confirmedAppointmentEmailForAdvisor()
-    );*/
+      confirmedAppointmentEmailForStudent(
+        studentInfo["name"],
+        advisorName["name"],
+        subjectName["name"],
+        dateString,
+        baseChanges.location
+      )
+    );
     createNotification(
       "Asesoría aceptada",
       "Tienes una Asesoría Aceptada",
@@ -80,12 +96,11 @@ const notificationForStudent = async (
       ENotificationType.APPOINTMENT_ACCEPTED
     );
   } else if (baseChanges.status === EStatus.CANCELED) {
-    /*
     sendEmail(
       studentInfo["email"],
       "¡Tu petición deasesoría fue aceptada!",
-      appointmentCancelledEmail()
-    );*/
+      appointmentCancelledEmail(dateString, subjectName)
+    );
     createNotification(
       "Asesoría rechazada",
       "Tu solicitud ha sido rechazada",
@@ -200,7 +215,7 @@ export const updateController = async (req: Request, res: Response) => {
   }
 
   try {
-    await notificationForStudent(baseChanges, idStudent);
+    await notificationForStudent(baseChanges, idStudent, detailChanges);
     await notificationForUsers(baseChanges, detailChanges);
   } catch (error) {
     res.send(error);
