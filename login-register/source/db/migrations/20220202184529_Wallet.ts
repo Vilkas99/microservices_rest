@@ -7,7 +7,6 @@ export async function up(knex: Knex): Promise<void> {
       table.string("name").notNullable();
       table.string("email").notNullable();
       table.string("password").notNullable();
-      table.integer("semester").notNullable();
       table.enum("status", ["ACTIVE", "DELETED", "INACTIVE"]).notNullable();
       table.enum("type", ["student", "advisor", "admin", "root"]).notNullable();
       table.timestamps(true, true);
@@ -114,6 +113,7 @@ export async function up(knex: Knex): Promise<void> {
       table.uuid("id").primary();
       table.uuid("id_user").references("id").inTable("users");
       table.uuid("id_career").references("id").inTable("careers");
+      table.integer("semester").notNullable;
     })
     .createTable("users-schedule", function (table) {
       table.uuid("id").primary();

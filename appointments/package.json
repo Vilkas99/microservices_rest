@@ -6,8 +6,8 @@
   "scripts": {
     "start": "nodemon source/server.ts",
     "build": "rm -rf build/ && prettier --write source/ && tsc",
-    "migrate": "knex migrate:latest --knexfile source/db/knexfile.ts",
-    "migrate_d": "knex migrate:down --knexfile source/db/knexfile.ts",
+    "migrate": "knex migrate:latest --knexfile knexfile.ts",
+    "migrate_d": "knex migrate:down --knexfile knexfile.ts",
     "create_m": "knex migrate:make --knexfile source/db/knexfile.ts -x ts walletDB",
     "create_s": "knex seed:make --knexfile source/db/knexfile.ts -x ts dev",
     "seed": "knex seed:run --knexfile source/db/knexfile.ts",
@@ -23,19 +23,27 @@
     "@types/axios": "^0.14.0",
     "@types/express": "^4.17.13",
     "@types/morgan": "^1.9.3",
+    "@types/nodemailer": "^6.4.4",
     "axios": "^0.25.0",
+    "cors": "^2.8.5",
+    "date-fns": "^2.28.0",
     "dotenv": "^16.0.0",
     "express": "^4.17.2",
     "knex": "^1.0.3",
     "morgan": "^1.10.0",
+    "node-cron": "^3.0.1",
+    "nodemailer": "^6.7.5",
     "nodemon": "^2.0.15",
     "objection": "^3.0.1",
     "pg": "^8.7.3",
+    "prettier": "^2.5.1",
     "random-date-generator": "^1.0.2",
     "ts-node": "^10.5.0",
     "typescript": "^4.5.5",
     "unique-names-generator": "^4.6.0",
-    "prettier": "^2.5.1",
     "uuidv4": "^6.2.12"
+  },
+  "devDependencies": {
+    "@types/node-cron": "^3.0.1"
   }
 }

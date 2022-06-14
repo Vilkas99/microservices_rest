@@ -1,9 +1,34 @@
 /** source/server.ts */
 import http from "http";
 import express, { Express } from "express";
+import cron from "node-cron";
+//Databes
+import db from "./db/db";
+import { Model } from "objection";
+
+//Functions
+import { errorHandler } from "./utils/functions";
+import { markAppointmentsAsCompleted } from "./tasks";
+import { sendEmail } from "./email";
 
 //Enviroment dotenv
 require("dotenv").config();
+
+//Objection relation w / Knex
+Model.knex(db);
+
+var cors = require("cors");
+
+// Tasks
+cron.schedule("0 */1 * * *", () => {
+  markAppointmentsAsCompleted()
+    .then((res) => {
+      console.log(`Se completaron las siguientes asesorás: ${res}`);
+    })
+    .catch((error) => {
+      console.log("Falló el deamon markAppointmentsAsCompleted", error);
+    });
+});
 
 //Routes
 const example_routes = require("./routes/Example");
@@ -17,34 +42,13 @@ router.use(express.urlencoded({ extended: false }));
 /** Takes care of JSON data */
 router.use(express.json());
 
-/** RULES OF OUR API */
-router.use((req, res, next) => {
-  // set the CORS policy
-  res.header("Access-Control-Allow-Origin", "*");
-  // set the CORS headers
-  res.header(
-    "Access-Control-Allow-Headers",
-    "origin, X-Requested-With,Content-Type,Accept, Authorization"
-  );
-  // set the CORS method headers
-  if (req.method === "OPTIONS") {
-    res.header("Access-Control-Allow-Methods", "GET PATCH DELETE POST");
-    return res.status(200).json({});
-  }
-  next();
-});
-
+router.use(cors());
 //Apply routes
 router.use("/admin", example_routes);
 router.use("/appointment", appointment_routes);
 
 /** Error handling */
-router.use((req, res, next) => {
-  const error = new Error("not found");
-  return res.status(404).json({
-    message: error.message,
-  });
-});
+router.use(errorHandler);
 
 /** Server */
 const httpServer = http.createServer(router);
