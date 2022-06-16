@@ -11,7 +11,8 @@
     "create_m": "knex migrate:make --knexfile source/db/knexfile.ts -x ts walletDB",
     "create_s": "knex seed:make --knexfile source/db/knexfile.ts -x ts dev",
     "seed": "knex seed:run --knexfile source/db/knexfile.ts",
-    "reset_db": "npm run migrate_d && npm run migrate"
+    "reset_db": "npm run migrate_d && npm run migrate",
+    "test": "jest --config ./jest.config.js"
   },
   "engines": {
     "node": "16.13"
@@ -42,5 +43,12 @@
     "typescript": "^4.5.5",
     "unique-names-generator": "^4.6.0",
     "uuidv4": "^6.2.12"
+  },
+  "devDependencies": {
+    "@babel/preset-typescript": "^7.17.12",
+    "@types/jest": "^28.1.1",
+    "jest": "^28.1.1",
+    "sqlite3": "^5.0.8",
+    "ts-jest": "^28.0.4"
   }
 }
